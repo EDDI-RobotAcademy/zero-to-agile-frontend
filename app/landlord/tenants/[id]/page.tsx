@@ -22,17 +22,30 @@ const DEAL_LABEL: Record<string, string> = {
   monthly: '월세',
 };
 
-export default function LandlordTenantDetailPage({ params }: { params: { id: string } }) {
+type PageProps = { params: Promise<{ id: string }> };
+
+export default function LandlordTenantDetailPage({ params }: PageProps) {
   const router = useRouter();
+  const [tenantId, setTenantId] = useState<string | null>(null);
   const [tenantRequest, setTenantRequest] = useState<TenantRequestDetail | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    getTenantRequestById(params.id).then(setTenantRequest);
-  }, [params.id]);
+    let active = true;
+    Promise.resolve(params).then(({ id }) => {
+      if (!active) return;
+      setTenantId(id);
+      getTenantRequestById(id).then((data) => {
+        if (active) setTenantRequest(data);
+      });
+    });
+    return () => {
+      active = false;
+    };
+  }, [params]);
 
   const handleContact = async () => {
-    if (!tenantRequest?.tenantId) return;
+    if (!tenantRequest?.tenantId || !tenantId) return;
     await sendContactRequest(tenantRequest.tenantId, 'listing-1', 'landlord-1');
     setMessage('컨택 요청을 보냈습니다.');
   };
