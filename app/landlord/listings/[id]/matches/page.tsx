@@ -61,7 +61,13 @@ export default function LandlordListingMatchesPage({ params }: PageProps) {
     <main className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">매칭된 임차인</h2>
-        <Button variant="secondary" onClick={() => router.push(`/landlord/listings/${params.id}`)}>
+        <Button
+          variant="secondary"
+          onClick={() => {
+            if (!listingId) return;
+            router.push(`/landlord/listings/${listingId}`);
+          }}
+        >
           매물 상세로 돌아가기
         </Button>
       </div>
