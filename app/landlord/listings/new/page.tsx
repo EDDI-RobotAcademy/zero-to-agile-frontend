@@ -4,15 +4,18 @@ import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/common/Button';
 import { createLandlordListing } from '@/lib/repositories/landlordRepository';
+import { ContractType, Listing, ListingType } from '@/types/listing';
 
 const districts = ['마포구', '용산구', '영등포구'];
 const listingTypes = ['apartment', 'officetel', 'villa', 'house', 'commercial'];
 const contractTypes = ['jeonse', 'sale'];
 const optionList = ['엘리베이터', '주차', '반려동물 가능', '테라스'];
 
+type FormState = Omit<Listing, 'id' | 'createdAt'>;
+
 export default function LandlordNewListingPage() {
   const router = useRouter();
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<FormState>({
     title: '새 매물 제목',
     region: '서울시',
     district: '마포구',
@@ -31,7 +34,7 @@ export default function LandlordNewListingPage() {
     status: 'active' as const,
   });
 
-  const handleChange = (key: string, value: string | number | string[]) => {
+  const handleChange = <K extends keyof FormState>(key: K, value: FormState[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -90,8 +93,8 @@ export default function LandlordNewListingPage() {
             매물 종류
             <select
               className="w-full rounded-md border border-gray-300 px-3 py-2"
-              value={form.type}
-              onChange={(e) => handleChange('type', e.target.value)}
+            value={form.type}
+              onChange={(e) => handleChange('type', e.target.value as ListingType)}
             >
               {listingTypes.map((t) => (
                 <option key={t}>{t}</option>
@@ -102,8 +105,8 @@ export default function LandlordNewListingPage() {
             계약 형태
             <select
               className="w-full rounded-md border border-gray-300 px-3 py-2"
-              value={form.contractType}
-              onChange={(e) => handleChange('contractType', e.target.value)}
+            value={form.contractType}
+              onChange={(e) => handleChange('contractType', e.target.value as ContractType)}
             >
               {contractTypes.map((t) => (
                 <option key={t}>{t}</option>
