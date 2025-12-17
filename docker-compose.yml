@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  nextjs-app:
+    image: ghcr.io/${REPO_USER}/agilebang-ui:latest
+    container_name: agilebang-ui
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - agilebang-net
+
+  nginx:
+    image: nginx:stable
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "37123:80"  # 외부에서 접속할 포트
+    volumes:
+      - ./conf:/etc/nginx/conf.d:ro
+    depends_on:
+      - nextjs-app
+    networks:
+      - agilebang-net
+
+networks:
+  agilebang-net:
+    driver: bridge
