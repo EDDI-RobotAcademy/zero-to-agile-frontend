@@ -15,6 +15,8 @@ interface MatchItem {
   matchScore: number;
 }
 
+type PageProps = { params: Promise<{ id: string }> };
+
 const RESIDENCE_LABEL: Record<string, string> = {
   apartment: '아파트',
   officetel: '오피스텔',
@@ -29,18 +31,29 @@ const DEAL_LABEL: Record<string, string> = {
   monthly: '월세',
 };
 
-export default function LandlordListingMatchesPage({ params }: { params: { id: string } }) {
+export default function LandlordListingMatchesPage({ params }: PageProps) {
   const router = useRouter();
+  const [listingId, setListingId] = useState<string | null>(null);
   const [matches, setMatches] = useState<MatchItem[]>([]);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    getMatchesForListing(params.id).then(setMatches);
-  }, [params.id]);
+    let active = true;
+    Promise.resolve(params).then(({ id }) => {
+      if (!active) return;
+      setListingId(id);
+      getMatchesForListing(id).then((data) => {
+        if (active) setMatches(data);
+      });
+    });
+    return () => {
+      active = false;
+    };
+  }, [params]);
 
   const handleContact = async (tenantId: string) => {
-    if (!tenantId) return;
-    await sendContactRequest(tenantId, params.id, 'landlord-1');
+    if (!tenantId || !listingId) return;
+    await sendContactRequest(tenantId, listingId, 'landlord-1');
     setMessage('컨택 요청을 보냈습니다.');
   };
 
