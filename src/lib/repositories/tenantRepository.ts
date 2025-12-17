@@ -40,14 +40,14 @@ function toKoreanDealType(value?: string) {
   return DEAL_TYPE_KO_MAP[value] ?? value;
 }
 
-function toEnglishResidenceType(value?: string) {
-  if (!value) return value;
+function toEnglishResidenceType(value?: string): string {
+  if (!value) return '';
   const entry = Object.entries(RESIDENCE_TYPE_KO_MAP).find(([, ko]) => ko === value);
   return entry ? entry[0] : value;
 }
 
-function toEnglishDealType(value?: string) {
-  if (!value) return value;
+function toEnglishDealType(value?: string): string {
+  if (!value) return '';
   const entry = Object.entries(DEAL_TYPE_KO_MAP).find(([, ko]) => ko === value);
   return entry ? entry[0] : value;
 }

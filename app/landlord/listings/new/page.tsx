@@ -171,7 +171,7 @@ export default function LandlordNewListingPage() {
               <label key={option} className="flex items-center gap-2 font-normal text-gray-700">
                 <input
                   type="checkbox"
-                  checked={form.options.includes(option)}
+                  checked={(form.options ?? []).includes(option)}
                   onChange={() => toggleOption(option)}
                 />
                 {option}

@@ -16,7 +16,7 @@ interface RoleContextValue {
   logout: () => Promise<void>;
   refreshAccessToken: () => Promise<string | null>;
   redirectToGoogle: (role: Exclude<UserRole, null>) => void;
-  authFetch: typeof authFetch;
+  authFetch: typeof baseAuthFetch;
 }
 
 const RoleContext = createContext<RoleContextValue>({

@@ -1,12 +1,20 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from 'react';
+import { FormEvent, Suspense, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useRole } from '@/lib/auth/roleContext';
 import { Button } from '@/components/common/Button';
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<main className="p-6 text-sm text-gray-600">로그인 페이지를 준비 중입니다...</main>}>
+      <LoginContent />
+    </Suspense>
+  );
+}
+
+function LoginContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { login, redirectToGoogle } = useRole();
