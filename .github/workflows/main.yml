@@ -43,6 +43,12 @@ jobs:
     runs-on: [self-hosted, agilebang-ui]
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Create .env file
+        run: echo "${{ secrets.FRONTEND_ENV }}" > .env
+
       - name: GHCR Login
         run: echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
     
@@ -55,8 +61,11 @@ jobs:
           docker logout
 
       - name: Run container
+        env:
+          REPO_USER: ${{ secrets.REPO_USER }}
+          IMAGE_TAG: latest
         run: |
-          docker-compose up -d
+          docker compose up -d
 
       - name: Health check
         run: |
