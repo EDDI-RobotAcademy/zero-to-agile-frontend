@@ -7,7 +7,7 @@ import {
   redirectToGoogleLogin,
 } from "./authClient";
 
-export type UserRole = "tenant" | "landlord" | null;
+export type UserRole = "finder" | "owner" | null;
 
 type State = {
   role: UserRole;
@@ -101,7 +101,7 @@ export const userStore = {
       typeof window !== "undefined"
         ? window.localStorage.getItem("role")
         : null;
-    if (storedRole === "tenant" || storedRole === "landlord") {
+    if (storedRole === "finder" || storedRole === "owner") {
       setState({ role: storedRole });
       await userStore.refreshAccessToken();
     }

@@ -1,9 +1,9 @@
 import { listingMocks } from '@/mocks/listings.mock';
 import { Listing } from '@/types/listing';
-import { TenantRequestDetail } from '@/types/tenant';
+import { FinderRequestDetail } from '@/types/finder';
 import { userStore } from '../auth/userStore';
 
-const BASE_PATH = '/tenant/recommendations';
+const BASE_PATH = '/finder/recommendations';
 
 let listingStore: Listing[] = [...listingMocks];
 
@@ -74,24 +74,24 @@ function toListing(item: any): Listing {
   return mapped;
 }
 
-function toRecommendPayload(tenantRequest?: TenantRequestDetail | null) {
-  if (!tenantRequest) return {};
+function toRecommendPayload(finderRequest?: FinderRequestDetail | null) {
+  if (!finderRequest) return {};
   return {
-    preferred_area: tenantRequest.preferredArea,
-    area: tenantRequest.area,
-    room_count: tenantRequest.roomCount,
-    bathroom_count: tenantRequest.bathroomCount,
-    deal_type: toKoreanDealType(tenantRequest.dealType),
-    budget: tenantRequest.budget,
+    preferred_area: finderRequest.preferredArea,
+    area: finderRequest.area,
+    room_count: finderRequest.roomCount,
+    bathroom_count: finderRequest.bathroomCount,
+    deal_type: toKoreanDealType(finderRequest.dealType),
+    budget: finderRequest.budget,
     limit: 20,
   };
 }
 
 export async function listRecommendedListings(
-  tenantRequest?: TenantRequestDetail | null,
+  finderRequest?: FinderRequestDetail | null,
 ): Promise<Listing[]> {
   // 요청 조건을 서버 DTO에 맞게 매핑
-  const payload = toRecommendPayload(tenantRequest);
+  const payload = toRecommendPayload(finderRequest);
 
   try {
     const res = await userStore.authFetch(BASE_PATH, {
@@ -125,9 +125,9 @@ export async function getListingById(id: string): Promise<Listing | null> {
   return refreshed.find((item) => item.id === id) ?? null;
 }
 
-export async function listLandlordListings(landlordId: string): Promise<Listing[]> {
+export async function listOwnerListings(ownerId: string): Promise<Listing[]> {
   const res = await listRecommendedListings();
-  return res.filter((listing) => listing.ownerId === landlordId);
+  return res.filter((listing) => listing.ownerId === ownerId);
 }
 
 export async function createListing(

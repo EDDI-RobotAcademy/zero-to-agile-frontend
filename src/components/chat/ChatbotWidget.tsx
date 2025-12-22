@@ -49,7 +49,7 @@ export function ChatbotWidget() {
     setIsLoading(true);
 
     try {
-      const res = await authFetch("/tenant/chatbot", {
+      const res = await authFetch("/finder/chatbot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: trimmed }),

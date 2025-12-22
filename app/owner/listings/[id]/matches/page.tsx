@@ -1,0 +1,97 @@
+"use client";
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/common/Button';
+import { Card } from '@/components/common/Card';
+import {
+  getMatchesForListing,
+  sendContactRequest,
+} from '@/lib/repositories/ownerRepository';
+import { FinderRequestDetail } from '@/types/finder';
+
+interface MatchItem {
+  finder: FinderRequestDetail;
+  matchScore: number;
+}
+
+type PageProps = { params: Promise<{ id: string }> };
+
+const RESIDENCE_LABEL: Record<string, string> = {
+  apartment: '아파트',
+  officetel: '오피스텔',
+  villa: '빌라',
+  house: '단독주택',
+  commercial: '상가',
+};
+
+const DEAL_LABEL: Record<string, string> = {
+  jeonse: '전세',
+  sale: '매매',
+  monthly: '월세',
+};
+
+export default function OwnerListingMatchesPage({ params }: PageProps) {
+  const router = useRouter();
+  const [listingId, setListingId] = useState<string | null>(null);
+  const [matches, setMatches] = useState<MatchItem[]>([]);
+  const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    Promise.resolve(params).then(({ id }) => {
+      if (!active) return;
+      setListingId(id);
+      getMatchesForListing(id).then((data) => {
+        if (active) setMatches(data);
+      });
+    });
+    return () => {
+      active = false;
+    };
+  }, [params]);
+
+  const handleContact = async (finderId: string) => {
+    if (!finderId || !listingId) return;
+    await sendContactRequest(finderId, listingId, 'owner-1');
+    setMessage('컨택 요청을 보냈습니다.');
+  };
+
+  return (
+    <main className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">매칭된 임차인</h2>
+        <Button
+          variant="secondary"
+          onClick={() => {
+            if (!listingId) return;
+            router.push(`/owner/listings/${listingId}`);
+          }}
+        >
+          매물 상세로 돌아가기
+        </Button>
+      </div>
+      {message && <p className="text-sm text-emerald-600">{message}</p>}
+      <div className="space-y-3">
+        {matches.map(({ finder, matchScore }) => (
+          <Card
+            key={finder.id}
+            title={`${finder.finderId} 의뢰서`}
+            actions={<span className="text-sm text-gray-600">매칭 점수 {matchScore}</span>}
+          >
+            <p className="text-sm text-gray-700">
+              지역: {finder.preferredArea} / {RESIDENCE_LABEL[finder.residenceType] ?? finder.residenceType} /{' '}
+              {DEAL_LABEL[finder.dealType] ?? finder.dealType}
+            </p>
+            <p className="text-sm text-gray-700">
+              예산 ({finder.dealType === 'sale' ? '매매가' : '보증금'}) {finder.budget.toLocaleString()} 만원 · 면적 {finder.area} m² 이상
+            </p>
+            <Button className="mt-3" onClick={() => handleContact(finder.finderId ?? '')}>
+              컨텍하기
+            </Button>
+          </Card>
+        ))}
+      </div>
+    </main>
+  );
+}
