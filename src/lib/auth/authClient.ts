@@ -20,14 +20,14 @@ function withApiBase(path: string) {
 }
 
 export function redirectToGoogleLogin(userType: "tenant" | "landlord") {
-  const url = `${withApiBase("/authentication/google")}?user_type=${userType}`;
+  const url = `${withApiBase("/api/auth/google")}?user_type=${userType}`;
   // 서버 리다이렉트로 OAuth 플로우 진입
   window.location.href = url;
 }
 
 export async function requestAccessTokenWithRefresh(): Promise<string | null> {
   try {
-    const res = await fetch(withApiBase("/authentication/token/refresh"), {
+    const res = await fetch(withApiBase("/api/auth/token/refresh"), {
       method: "POST",
       credentials: "include", // refresh_token 쿠키 사용
     });
@@ -43,7 +43,7 @@ export async function requestAccessTokenWithRefresh(): Promise<string | null> {
 
 export async function logoutFromServer() {
   try {
-    await fetch(withApiBase("/authentication/logout"), {
+    await fetch(withApiBase("/api/auth/logout"), {
       method: "POST",
       credentials: "include",
     });
@@ -52,7 +52,7 @@ export async function logoutFromServer() {
   } finally {
     // 서버 삭제에 실패하더라도 클라이언트 쿠키를 만료시켜 새 토큰 발급을 막는다.
     if (typeof document !== "undefined") {
-      document.cookie = "refresh_token=; path=/authentication; max-age=0";
+      document.cookie = "refresh_token=; path=/api/auth; max-age=0";
     }
   }
 }
