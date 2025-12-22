@@ -21,17 +21,17 @@ function LoginContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const roleParam = searchParams.get('role');
-  const roleLabel = roleParam === 'tenant' ? '임차인' : roleParam === 'landlord' ? '임대인' : null;
+  const roleLabel = roleParam === 'finder' ? '임차인' : roleParam === 'owner' ? '임대인' : null;
 
   const nextPath = useMemo(() => {
-    if (roleParam === 'tenant') return '/tenant';
-    if (roleParam === 'landlord') return '/landlord';
+    if (roleParam === 'finder') return '/finder';
+    if (roleParam === 'owner') return '/owner';
     return '/auth/role-select';
   }, [roleParam]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (roleParam !== 'tenant' && roleParam !== 'landlord') {
+    if (roleParam !== 'finder' && roleParam !== 'owner') {
       router.push('/auth/role-select');
       return;
     }
@@ -43,7 +43,7 @@ function LoginContent() {
   };
 
   const handleGoogleLogin = () => {
-    if (roleParam !== 'tenant' && roleParam !== 'landlord') {
+    if (roleParam !== 'finder' && roleParam !== 'owner') {
       router.push('/auth/role-select');
       return;
     }

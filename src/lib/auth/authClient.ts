@@ -19,7 +19,7 @@ function withApiBase(path: string) {
   return `${getApiBase()}${path}`;
 }
 
-export function redirectToGoogleLogin(userType: "tenant" | "landlord") {
+export function redirectToGoogleLogin(userType: "finder" | "owner") {
   const url = `${withApiBase("/auth/google")}?user_type=${userType}`;
   // 서버 리다이렉트로 OAuth 플로우 진입
   window.location.href = url;
