@@ -19,7 +19,7 @@ function withApiBase(path: string) {
   return `${getApiBase()}${path}`;
 }
 
-export function redirectToGoogleLogin(userType: "tenant" | "landlord") {
+export function redirectToGoogleLogin(userType: "finder" | "owner") {
   const url = `${withApiBase("/auth/google")}?user_type=${userType}`;
   // 서버 리다이렉트로 OAuth 플로우 진입
   window.location.href = url;
@@ -58,16 +58,34 @@ export async function logoutFromServer() {
 }
 
 export async function authFetch(
-  pathOrUrl: string,
-  init: RequestInit = {},
-  accessToken?: string | null,
+    pathOrUrl: string,
+    init: RequestInit = {},
+    accessToken?: string | null,
 ) {
+  // [ADD] 호출부에서 /api를 매번 붙이지 않도록 전역 프리픽스(prefix) 적용
+  // - 절대 URL(http/https)은 그대로 사용
+  // - 이미 /api로 시작하면 중복 방지
+  const API_PREFIX = "/api";
+
+  const normalizeApiPath = (p: string) => {
+    if (p.startsWith("http://") || p.startsWith("https://")) return p;
+
+    const normalized = p.startsWith("/") ? p : `/${p}`;
+
+    if (normalized === API_PREFIX || normalized.startsWith(`${API_PREFIX}/`)) {
+      return normalized;
+    }
+
+    return `${API_PREFIX}${normalized}`;
+  };
+
   const headers = new Headers(init.headers || {});
   if (accessToken) {
     headers.set("Authorization", `Bearer ${accessToken}`);
   }
 
-  return fetch(withApiBase(pathOrUrl), {
+  // [CHANGE] withApiBase 호출 전에 normalizeApiPath 적용
+  return fetch(withApiBase(normalizeApiPath(pathOrUrl)), {
     ...init,
     headers,
     credentials: init.credentials ?? "include",
