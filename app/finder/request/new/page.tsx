@@ -55,7 +55,12 @@ export default function FinderRequestNewPage() {
         } else {
           const summaries = await listFinderRequests();
           if (summaries.length) {
-            detail = await getFinderRequestById(summaries[0].id);
+            // ✅ id가 undefined일 수 있으니, 안전하게 number로 확정
+            const targetId = summaries[0]?.id ?? summaries[0]?.finderRequestId;
+
+            if (targetId !== undefined) {
+              detail = await getFinderRequestById(targetId);
+            }
           }
         }
         if (detail) {
@@ -89,7 +94,10 @@ export default function FinderRequestNewPage() {
       if (isEdit) {
         const id = editIdParam ? Number(editIdParam) : undefined;
         const summaries = !id ? await listFinderRequests() : [];
-        const targetId = id ?? summaries[0]?.id;
+
+        // ✅ id가 없으면 summaries[0]에서 안전하게 가져오고, 그래도 없으면 finderRequestId로 대체
+        const targetId = id ?? summaries[0]?.id ?? summaries[0]?.finderRequestId;
+
         if (!targetId) throw new Error('수정할 의뢰서를 찾을 수 없습니다.');
         await updateFinderRequest(targetId, form);
       } else {
