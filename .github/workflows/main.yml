@@ -34,6 +34,10 @@ jobs:
           push: true
           tags: ghcr.io/${{ secrets.REPO_USER }}/agilebang-ui:latest
           platforms: linux/arm64
+          build-args: |
+            NEXT_PUBLIC_API_BASE_URL=${{ secrets.NEXT_PUBLIC_API_BASE_URL }}
+            NEXT_PUBLIC_GOOGLE_LOGIN_PATH=${{ secrets.NEXT_PUBLIC_GOOGLE_LOGIN_PATH }}
+            NEXT_PUBLIC_GTM_ID=${{ secrets.NEXT_PUBLIC_GTM_ID }}
 
   deploy:
     needs: build-and-push
