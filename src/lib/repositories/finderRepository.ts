@@ -32,6 +32,7 @@ let finderRequestStore: FinderRequestDetail | null = finderRequestMock;
 
 function toFinderRequestSummary(data: any): FinderRequestSummary {
   return {
+    id: Number(data.id ?? data.finder_request_id ?? 0),  // 추가
     finderRequestId: data.finder_request_id,
     preferredRegion: data.preferred_region ?? "",
     priceType: data.price_type as PriceType,
@@ -44,6 +45,9 @@ function toFinderRequestSummary(data: any): FinderRequestSummary {
 
 function toFinderRequestDetail(data: any): FinderRequestDetail {
   return {
+    id: Number(data.id ?? data.finder_request_id ?? 0),  // 추가
+    finderId: data.finder_id ?? data.finderId,           // 추가(있으면 매핑)
+
     finderRequestId: data.finder_request_id,
     preferredRegion: data.preferred_region ?? "",
     priceType: data.price_type as PriceType,
@@ -51,6 +55,13 @@ function toFinderRequestDetail(data: any): FinderRequestDetail {
     maxRent: data.max_rent ?? 0,
     houseType: data.house_type as HouseType,
     status: (data.status ?? "N") as FinderRequestStatus,
+
+    // UI에서 쓰는 값들(있으면 매핑되게)
+    preferredArea: data.preferred_area,
+    residenceType: data.residence_type,
+    dealType: data.deal_type,
+    budget: data.budget,
+    area: data.area,
 
     createdAt: data.created_at,
     updatedAt: data.updated_at,
