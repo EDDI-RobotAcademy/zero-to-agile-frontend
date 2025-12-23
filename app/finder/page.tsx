@@ -43,7 +43,14 @@ export default function FinderHomePage() {
           setRequest(null);
           return;
         }
-        const detail = await getFinderRequestById(summaries[0].id);
+
+        const targetId = summaries[0]?.id ?? summaries[0]?.finderRequestId;
+        if (targetId === undefined) {
+          setRequest(null);
+          return;
+        }
+
+        const detail = await getFinderRequestById(targetId);
         setRequest(detail);
       } catch (err: any) {
         setError(err?.message ?? '의뢰서를 불러오지 못했습니다.');
@@ -104,20 +111,24 @@ export default function FinderHomePage() {
             <div>
               <dt className="text-xs uppercase tracking-[0.08em] text-slate-500">매물 종류</dt>
               <dd className="text-base font-semibold text-slate-900">
-                {RESIDENCE_LABEL[request.residenceType] ?? request.residenceType}
+                {request.residenceType
+                    ? (RESIDENCE_LABEL[request.residenceType] ?? request.residenceType)
+                    : '-'}
               </dd>
             </div>
             <div>
               <dt className="text-xs uppercase tracking-[0.08em] text-slate-500">계약 형태</dt>
               <dd className="text-base font-semibold text-slate-900">
-                {DEAL_LABEL[request.dealType] ?? request.dealType}
+                {request.dealType
+                    ? (DEAL_LABEL[request.dealType] ?? request.dealType)
+                    : '-'}
               </dd>
             </div>
             <div>
               <dt className="text-xs uppercase tracking-[0.08em] text-slate-500">
                 예산 ({request.dealType === 'sale' ? '매매가' : '보증금'})
               </dt>
-              <dd className="text-base font-semibold text-slate-900">{request.budget.toLocaleString()} 만원</dd>
+              <dd className="text-base font-semibold text-slate-900">{(request.budget ?? 0).toLocaleString()} 만원</dd>
             </div>
           </dl>
           <div className="mt-4 flex flex-wrap gap-3">
