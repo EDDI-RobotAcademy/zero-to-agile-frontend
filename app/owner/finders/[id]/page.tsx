@@ -35,7 +35,14 @@ export default function OwnerFinderDetailPage({ params }: PageProps) {
     Promise.resolve(params).then(({ id }) => {
       if (!active) return;
       setFinderId(id);
-      getFinderRequestById(id).then((data) => {
+
+      // ✅ string -> number 변환
+      const numericId = Number(id);
+
+      // ✅ 숫자가 아니면 호출하지 않도록 방어
+      if (!Number.isFinite(numericId)) return;
+
+      getFinderRequestById(numericId).then((data) => {
         if (active) setFinderRequest(data);
       });
     });
@@ -78,17 +85,25 @@ export default function OwnerFinderDetailPage({ params }: PageProps) {
           </div>
           <div>
             <dt className="font-semibold">매물 종류</dt>
-            <dd>{RESIDENCE_LABEL[finderRequest.residenceType] ?? finderRequest.residenceType}</dd>
+            <dd>
+              {finderRequest.residenceType
+                  ? (RESIDENCE_LABEL[finderRequest.residenceType] ?? finderRequest.residenceType)
+                  : '-'}
+            </dd>
           </div>
           <div>
             <dt className="font-semibold">계약 형태</dt>
-            <dd>{DEAL_LABEL[finderRequest.dealType] ?? finderRequest.dealType}</dd>
+            <dd>
+              {finderRequest.dealType
+                  ? (DEAL_LABEL[finderRequest.dealType] ?? finderRequest.dealType)
+                  : '-'}
+            </dd>
           </div>
           <div>
             <dt className="font-semibold">
               예산 ({finderRequest.dealType === 'sale' ? '매매가' : '보증금'})
             </dt>
-            <dd>{finderRequest.budget.toLocaleString()} 만원</dd>
+            <dd>{(finderRequest.budget ?? 0).toLocaleString()} 만원</dd>
           </div>
           <div>
             <dt className="font-semibold">면적</dt>

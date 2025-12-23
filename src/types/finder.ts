@@ -26,6 +26,7 @@ export interface FinderRequestSummary {
 }
 
 export interface FinderRequestDetail extends FinderRequestSummary {
+  finderId: string | undefined;
   area?: number;
   budget?: number;
   dealType?: string;
