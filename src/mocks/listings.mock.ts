@@ -21,7 +21,7 @@ export const listingMocks: Listing[] = [
     description: '공덕역 인근 신축 단지, 채광 우수, 대형 마트 도보권.',
     aiDescription:
       '햇살 가득한 거실과 깔끔한 화이트톤 인테리어로 바로 입주 가능한 신축급 아파트입니다.',
-    ownerId: 'landlord-1',
+    ownerId: 'owner-1',
     createdAt: '2024-01-12T09:00:00Z',
     status: 'active',
   },
@@ -45,7 +45,7 @@ export const listingMocks: Listing[] = [
     description: '주거+임대 수익 가능한 상가주택, 관광 상권 중심.',
     aiDescription:
       '유동인구가 풍부한 골목에 위치해 공실 위험이 적고, 테라스가 있어 다양한 업종을 수용할 수 있습니다.',
-    ownerId: 'landlord-1',
+    ownerId: 'owner-1',
     createdAt: '2024-02-03T12:00:00Z',
     status: 'active',
   },
@@ -65,7 +65,7 @@ export const listingMocks: Listing[] = [
     images: ['https://placehold.co/600x360?text=영등포+빌라'],
     description: '올리모델링 완료, 조용한 주거지, 편의시설 도보 5분.',
     aiDescription: '깔끔한 리모델링과 정돈된 골목 분위기로 첫 독립에 적합한 공간입니다.',
-    ownerId: 'landlord-2',
+    ownerId: 'owner-2',
     createdAt: '2024-03-21T18:00:00Z',
     status: 'active',
   },

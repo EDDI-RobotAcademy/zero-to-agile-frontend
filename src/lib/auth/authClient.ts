@@ -10,7 +10,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 function getApiBase(): string {
   // 백엔드 기본 포트: 33333 (env를 덮어쓸 수 있음)
-  const base = API_BASE_URL || "http://localhost:33333";
+  const base = API_BASE_URL;
   return `${base}/api`;
 }
 
@@ -19,7 +19,7 @@ function withApiBase(path: string) {
   return `${getApiBase()}${path}`;
 }
 
-export function redirectToGoogleLogin(userType: "tenant" | "landlord") {
+export function redirectToGoogleLogin(userType: "finder" | "owner") {
   const url = `${withApiBase("/auth/google")}?user_type=${userType}`;
   // 서버 리다이렉트로 OAuth 플로우 진입
   window.location.href = url;
@@ -58,9 +58,9 @@ export async function logoutFromServer() {
 }
 
 export async function authFetch(
-  pathOrUrl: string,
-  init: RequestInit = {},
-  accessToken?: string | null,
+    pathOrUrl: string,
+    init: RequestInit = {},
+    accessToken?: string | null,
 ) {
   const headers = new Headers(init.headers || {});
   if (accessToken) {

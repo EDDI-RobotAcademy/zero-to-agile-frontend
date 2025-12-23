@@ -4,19 +4,19 @@ import { Card } from '@/components/common/Card';
 export default function RoleSelectPage() {
   const roles = [
     {
-      key: 'tenant',
+      key: 'finder',
       title: '임차인으로 시작하기',
       desc: '예산·지역·방 개수만 입력하면 맞춤 의뢰서와 추천 매물을 바로 받아요.',
       badge: '추천',
-      href: '/auth/login?role=tenant',
+      href: '/auth/login?role=finder',
       tone: 'from-blue-500/10 via-blue-400/10 to-blue-300/10 border-blue-200 text-blue-800',
     },
     {
-      key: 'landlord',
+      key: 'owner',
       title: '임대인으로 시작하기',
       desc: '내 매물을 등록하고, 맞춤 수요서와 컨택 요청을 한 화면에서 관리합니다.',
       badge: '빠른 등록',
-      href: '/auth/login?role=landlord',
+      href: '/auth/login?role=owner',
       tone:
         'from-emerald-500/10 via-emerald-400/10 to-emerald-300/10 border-emerald-200 text-emerald-800',
     },
