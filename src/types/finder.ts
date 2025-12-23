@@ -15,6 +15,7 @@ export interface FinderProfile {
 }
 
 export interface FinderRequestSummary {
+  id?: number;
   finderRequestId: number;
   preferredRegion: string;
   priceType: PriceType;
