@@ -15,7 +15,7 @@ export interface FinderProfile {
 }
 
 export interface FinderRequestSummary {
-  id?: number;
+  id: number;
   finderRequestId: number;
   preferredRegion: string;
   priceType: PriceType;
@@ -26,6 +26,11 @@ export interface FinderRequestSummary {
 }
 
 export interface FinderRequestDetail extends FinderRequestSummary {
+  area?: number;
+  budget?: number;
+  dealType?: string;
+  residenceType?: string;
+  preferredArea?: string;
   createdAt?: string;
   updatedAt?: string;
   additionalCondition?: string;
