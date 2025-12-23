@@ -10,7 +10,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 function getApiBase(): string {
   // 백엔드 기본 포트: 33333 (env를 덮어쓸 수 있음)
-  const base = API_BASE_URL || "http://localhost:33333";
+  const base = API_BASE_URL;
   return `${base}/api`;
 }
 
