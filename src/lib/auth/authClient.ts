@@ -6,17 +6,23 @@
  * - Access Token은 메모리/상태에 보관하고 Authorization 헤더로 붙입니다.
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+
+// function getApiBase(): string {
+//   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+//   // 백엔드 기본 포트: 33333 (env를 덮어쓸 수 있음)
+//   const base = API_BASE_URL;
+//   return `${base}/api`;
+// }
 
 function getApiBase(): string {
-  // 백엔드 기본 포트: 33333 (env를 덮어쓸 수 있음)
-  const base = API_BASE_URL || "http://localhost:33333";
-  return `${base}/api`;
+  return "/api";
 }
 
 function withApiBase(path: string) {
   if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  return `${getApiBase()}${path}`;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${getApiBase()}${normalizedPath}`;
 }
 
 export function redirectToGoogleLogin(userType: "finder" | "owner") {
@@ -62,30 +68,12 @@ export async function authFetch(
     init: RequestInit = {},
     accessToken?: string | null,
 ) {
-  // [ADD] 호출부에서 /api를 매번 붙이지 않도록 전역 프리픽스(prefix) 적용
-  // - 절대 URL(http/https)은 그대로 사용
-  // - 이미 /api로 시작하면 중복 방지
-  const API_PREFIX = "/api";
-
-  const normalizeApiPath = (p: string) => {
-    if (p.startsWith("http://") || p.startsWith("https://")) return p;
-
-    const normalized = p.startsWith("/") ? p : `/${p}`;
-
-    if (normalized === API_PREFIX || normalized.startsWith(`${API_PREFIX}/`)) {
-      return normalized;
-    }
-
-    return `${API_PREFIX}${normalized}`;
-  };
-
   const headers = new Headers(init.headers || {});
   if (accessToken) {
     headers.set("Authorization", `Bearer ${accessToken}`);
   }
 
-  // [CHANGE] withApiBase 호출 전에 normalizeApiPath 적용
-  return fetch(withApiBase(normalizeApiPath(pathOrUrl)), {
+  return fetch(withApiBase(pathOrUrl), {
     ...init,
     headers,
     credentials: init.credentials ?? "include",
