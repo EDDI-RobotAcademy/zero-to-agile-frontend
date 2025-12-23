@@ -1,167 +1,179 @@
 "use client";
 
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/common/Button';
 import { Card } from '@/components/common/Card';
 import { useRole } from '@/lib/auth/roleContext';
 import {
-  deleteFinderRequest,
-  getFinderRequestById,
   listFinderRequests,
 } from '@/lib/repositories/finderRepository';
-import { FinderRequestDetail } from '@/types/finder';
+import { FinderRequestSummary } from '@/types/finder';
+import {
+  HOUSE_TYPE_LABEL,
+  PRICE_TYPE_LABEL,
+  STATUS_LABEL
+} from '@/types/finder.constants';
 
-const RESIDENCE_LABEL: Record<string, string> = {
-  apartment: '아파트',
-  officetel: '오피스텔',
-  villa: '빌라',
-  house: '단독주택',
-  commercial: '상가',
-};
-
-const DEAL_LABEL: Record<string, string> = {
-  jeonse: '전세',
-  sale: '매매',
-  monthly: '월세',
-};
 
 export default function FinderRequestPage() {
   const router = useRouter();
   const { isReady, isAuthenticated } = useRole();
-  const [request, setRequest] = useState<FinderRequestDetail | null>(null);
+  const [requests, setRequests] = useState<FinderRequestSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isReady) return;
     if (!isAuthenticated) {
-      router.replace('/auth/role-select');
+      router.replace("/auth/role-select");
       return;
     }
+
     (async () => {
       try {
         setLoading(true);
         setError(null);
-        const summaries = await listFinderRequests();
-        if (!summaries.length) {
-          setRequest(null);
-          return;
-        }
-        const detail = await getFinderRequestById(summaries[0].id);
-        setRequest(detail);
+
+        const data = await listFinderRequests();
+        setRequests(data);
+
       } catch (err: any) {
-        setError(err?.message ?? '의뢰서를 불러오지 못했습니다.');
+        setError(err?.message ?? "의뢰서를 불러오지 못했습니다.");
       } finally {
         setLoading(false);
       }
     })();
   }, [isReady, isAuthenticated, router]);
 
+  // 이건 상세조회로
   const handleDelete = async () => {
-    if (!request) return;
-    if (!window.confirm('의뢰서를 삭제하시겠습니까?')) return;
-    try {
-      await deleteFinderRequest(request.id);
-      setRequest(null);
-    } catch (err: any) {
-      setError(err?.message ?? '삭제에 실패했습니다.');
-    }
+    // if (!request) return;
+    // if (!window.confirm('의뢰서를 삭제하시겠습니까?')) return;
+    // try {
+    //   await deleteFinderRequest(request.id);
+    //   setRequest(null);
+    // } catch (err: any) {
+    //   setError(err?.message ?? '삭제에 실패했습니다.');
+    // }
   };
+ return (
+    <main className="space-y-6">
+      {/* 헤더 */}
+      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 via-white to-blue-50 p-6 shadow-sm ring-1 ring-slate-100">
+        <p className="text-sm font-semibold text-sky-700">의뢰서</p>
+        <h2 className="text-3xl font-bold text-slate-900">
+          내 매물 의뢰서
+        </h2>
+        <p className="text-sm text-slate-600">
+          작성한 의뢰서를 한눈에 확인할 수 있어요.
+        </p>
+      </div>
 
-  if (!request) {
-    return (
-      <main className="space-y-6">
-        <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 via-white to-blue-50 p-6 shadow-sm ring-1 ring-slate-100">
-          <div className="space-y-1">
-            <p className="text-sm font-semibold text-sky-700">의뢰서</p>
-            <h2 className="text-3xl font-bold text-slate-900">내 매물 의뢰서</h2>
-            <p className="text-sm text-slate-600">간단히 작성하면 맞춤 매물 추천이 시작돼요.</p>
-          </div>
-        </div>
+      {/* 에러 */}
+      {error && <p className="text-sm text-red-600">{error}</p>}
+
+      {/* 로딩 */}
+      {loading && (
+        <Card title="불러오는 중" actions={null}>
+          <p className="text-slate-700">
+            의뢰서를 불러오는 중이에요...
+          </p>
+        </Card>
+      )}
+
+      {/* 의뢰서 없음 */}
+      {!loading && requests.length === 0 && (
         <Card title="의뢰서 없음" actions={null}>
           <p className="text-slate-700">
-            {loading ? '불러오는 중...' : '아직 의뢰서를 작성하지 않았습니다.'}
+            아직 의뢰서를 작성하지 않았습니다.
           </p>
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          {!loading && (
-            <Button className="mt-4 w-full rounded-xl py-3" onClick={() => (window.location.href = '/finder/request/new')}>
-              지금 작성하기
-            </Button>
-          )}
+          <Button
+            className="mt-4 w-full rounded-xl py-3"
+            onClick={() => router.push("/finder/request/new")}
+          >
+            지금 작성하기
+          </Button>
         </Card>
-      </main>
-    );
-  }
+      )}
 
-  return (
-    <main className="space-y-6">
-      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 via-white to-blue-50 p-6 shadow-sm ring-1 ring-slate-100">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-sm font-semibold text-sky-700">의뢰서</p>
-            <h2 className="text-3xl font-bold text-slate-900">내 매물 의뢰서</h2>
-            <p className="text-sm text-slate-600">요약을 확인하고 필요하면 바로 수정하세요.</p>
-          </div>
-          <div className="flex gap-2">
-            <Link
-              href={`/finder/request/new?mode=edit&id=${request.id}`}
-              className="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-0.5"
-            >
-              수정하기
-            </Link>
-            <button
-              className="rounded-full border border-red-200 bg-red-50 px-4 py-2 text-xs font-semibold text-red-700 transition hover:-translate-y-0.5 hover:border-red-300"
-              onClick={handleDelete}
-            >
-              삭제하기
-            </button>
-          </div>
+      {/* 의뢰서 목록 (작은 카드 여러 개) */}
+      {!loading && requests.length > 0 && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {requests.map((request) => {
+            const statusLabel = STATUS_LABEL[request.status];
+            const houseTypeLabel = HOUSE_TYPE_LABEL[request.houseType];
+            const priceTypeLabel = PRICE_TYPE_LABEL[request.priceType];
+            
+            return (
+              <button
+                key={request.finderRequestId}
+                type="button"
+                onClick={() =>
+                  router.push(`/finder/request/${request.finderRequestId}`)
+                }
+                className="text-left"
+              >
+                <div className="group rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+                  {/* 상단 */}
+                  <div className="mb-3 flex items-center justify-between">
+                    <h3 className="text-sm font-bold text-slate-900">
+                      의뢰서 #{request.finderRequestId}
+                    </h3>
+                    <span
+                      className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold
+                        ${
+                          request.status === "Y"
+                            ? "bg-blue-50 text-blue-700"
+                            : "bg-slate-100 text-slate-600"
+                        }
+                      `}
+                    >
+                      {statusLabel}
+                    </span>
+                  </div>
+
+                  {/* 요약 */}
+                  <div className="space-y-1 text-sm text-slate-700">
+                    <p>
+                      <span className="text-slate-500">지역 · </span>
+                      {request.preferredRegion}
+                    </p>
+
+                    <p>
+                      <span className="text-slate-500">임대 유형 · </span>
+                      {priceTypeLabel}
+                      {request.priceType === "MONTHLY" && (
+                          <span className="text-slate-600">
+                            {" "}
+                            ({Number(request.maxRent ?? 0).toLocaleString()}원 이하)
+                          </span>
+                        )}
+                    </p>
+
+                    <p>
+                      <span className="text-slate-500">부동산 유형 · </span>
+                      {houseTypeLabel}
+                    </p>
+
+                    <p>
+                      <span className="text-slate-500">최대 보증금 · </span>
+                      {Number(request.maxDeposit ?? 0).toLocaleString()} 원
+                    </p>
+                  </div>
+
+                  <div className="mt-3 flex justify-end">
+                    <span className="pr-2 text-xs text-slate-400 transition group-hover:text-slate-600">
+                      클릭하여 상세보기 →
+                    </span>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
         </div>
-      </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      <Card title="요약" actions={null}>
-        <dl className="grid gap-3 text-sm text-slate-700 sm:grid-cols-2">
-          <div>
-            <dt className="text-xs uppercase tracking-[0.08em] text-slate-500">지역</dt>
-            <dd className="text-base font-semibold text-slate-900">{request.preferredArea}</dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase tracking-[0.08em] text-slate-500">매물 종류</dt>
-            <dd className="text-base font-semibold text-slate-900">
-              {RESIDENCE_LABEL[request.residenceType] ?? request.residenceType}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase tracking-[0.08em] text-slate-500">계약 형태</dt>
-            <dd className="text-base font-semibold text-slate-900">
-              {DEAL_LABEL[request.dealType] ?? request.dealType}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase tracking-[0.08em] text-slate-500">
-              예산 ({request.dealType === 'sale' ? '매매가' : '보증금'})
-            </dt>
-            <dd className="text-base font-semibold text-slate-900">
-              {request.budget.toLocaleString()} 원
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase tracking-[0.08em] text-slate-500">최소 면적</dt>
-            <dd className="text-base font-semibold text-slate-900">{request.area} m²</dd>
-          </div>
-          <div>
-            <dt className="text-xs uppercase tracking-[0.08em] text-slate-500">방/욕실</dt>
-            <dd className="text-base font-semibold text-slate-900">
-              {request.roomCount} / {request.bathroomCount}
-            </dd>
-          </div>
-        </dl>
-        <Button className="mt-5 w-full rounded-xl py-3" onClick={() => (window.location.href = '/finder/listings')}>
-          이 조건으로 추천 매물 보기
-        </Button>
-      </Card>
+      )}
     </main>
   );
+
 }
