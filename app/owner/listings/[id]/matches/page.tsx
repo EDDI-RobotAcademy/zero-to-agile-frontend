@@ -74,22 +74,31 @@ export default function OwnerListingMatchesPage({ params }: PageProps) {
       {message && <p className="text-sm text-emerald-600">{message}</p>}
       <div className="space-y-3">
         {matches.map(({ finder, matchScore }) => (
-          <Card
-            key={finder.id}
-            title={`${finder.finderId} 의뢰서`}
-            actions={<span className="text-sm text-gray-600">매칭 점수 {matchScore}</span>}
-          >
-            <p className="text-sm text-gray-700">
-              지역: {finder.preferredArea} / {RESIDENCE_LABEL[finder.residenceType] ?? finder.residenceType} /{' '}
-              {DEAL_LABEL[finder.dealType] ?? finder.dealType}
-            </p>
-            <p className="text-sm text-gray-700">
-              예산 ({finder.dealType === 'sale' ? '매매가' : '보증금'}) {finder.budget.toLocaleString()} 만원 · 면적 {finder.area} m² 이상
-            </p>
-            <Button className="mt-3" onClick={() => handleContact(finder.finderId ?? '')}>
-              컨텍하기
-            </Button>
-          </Card>
+            <Card
+                key={finder.id ?? finder.finderRequestId}   // id가 없을 수 있으면 fallback
+                title={`${(finder.finderId ?? String(finder.finderRequestId))} 의뢰서`}
+                actions={<span className="text-sm text-gray-600">매칭 점수 {matchScore}</span>}
+            >
+              <p className="text-sm text-gray-700">
+                지역: {(finder.preferredArea ?? finder.preferredRegion) ?? '-'} /{' '}
+                {finder.residenceType
+                    ? (RESIDENCE_LABEL[finder.residenceType] ?? finder.residenceType)
+                    : '-'} /{' '}
+                {finder.dealType
+                    ? (DEAL_LABEL[finder.dealType] ?? finder.dealType)
+                    : '-'}
+              </p>
+
+              <p className="text-sm text-gray-700">
+                예산 ({finder.dealType === 'sale' ? '매매가' : '보증금'}){' '}
+                {Number(finder.budget ?? 0).toLocaleString()} 만원 · 면적{' '}
+                {finder.area ?? '-'} m² 이상
+              </p>
+
+              <Button className="mt-3" onClick={() => handleContact(finder.finderId ?? '')}>
+                컨텍하기
+              </Button>
+            </Card>
         ))}
       </div>
     </main>

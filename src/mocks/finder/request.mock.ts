@@ -1,6 +1,9 @@
 import { FinderRequestDetail } from '@/types/finder';
 
 export let finderRequestMock: FinderRequestDetail | null = {
+  id: 1,                 // 추가: FinderRequestSummary 필수
+  finderId: undefined,   // 추가: FinderRequestDetail 필수(값은 undefined 허용)
+
   finderRequestId: 1,
   preferredRegion: 'Gangnam-gu',
   houseType: 'APARTMENT',
@@ -11,3 +14,4 @@ export let finderRequestMock: FinderRequestDetail | null = {
   roomCount: 3,
   bathroomCount: 2,
 };
+

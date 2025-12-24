@@ -2,7 +2,8 @@ import { USE_MOCK } from "@/config/env";
 import { finderRequestMock } from "@/mocks/finder/request.mock";
 import {
   FinderRequestDetail,
-  FinderRequestPayload,
+  FinderRequestUpdatePayload,
+  FinderRequestCreatePayload,
   FinderRequestSummary,
   PriceType,
   HouseType,
@@ -32,6 +33,7 @@ let finderRequestStore: FinderRequestDetail | null = finderRequestMock;
 
 function toFinderRequestSummary(data: any): FinderRequestSummary {
   return {
+    id: Number(data.id ?? data.finder_request_id ?? 0),  // 추가
     finderRequestId: data.finder_request_id,
     preferredRegion: data.preferred_region ?? "",
     priceType: data.price_type as PriceType,
@@ -44,6 +46,9 @@ function toFinderRequestSummary(data: any): FinderRequestSummary {
 
 function toFinderRequestDetail(data: any): FinderRequestDetail {
   return {
+    id: Number(data.id ?? data.finder_request_id ?? 0),  // 추가
+    finderId: data.finder_id ?? data.finderId,           // 추가(있으면 매핑)
+
     finderRequestId: data.finder_request_id,
     preferredRegion: data.preferred_region ?? "",
     priceType: data.price_type as PriceType,
@@ -51,6 +56,13 @@ function toFinderRequestDetail(data: any): FinderRequestDetail {
     maxRent: data.max_rent ?? 0,
     houseType: data.house_type as HouseType,
     status: (data.status ?? "N") as FinderRequestStatus,
+
+    // UI에서 쓰는 값들(있으면 매핑되게)
+    preferredArea: data.preferred_area,
+    residenceType: data.residence_type,
+    dealType: data.deal_type,
+    budget: data.budget,
+    area: data.area,
 
     createdAt: data.created_at,
     updatedAt: data.updated_at,
@@ -66,18 +78,60 @@ function toFinderRequestDetail(data: any): FinderRequestDetail {
  * - camelCase → snake_case
  * ======================================================
  */
-function toServerPayload(
-  payload: Partial<FinderRequestPayload>,
-): Record<string, any> {
+
+// function toServerPayload(
+//   payload: Partial<FinderRequestPayload>,
+// ): Record<string, any> {
+//   return {
+//     preferred_region: payload.preferredRegion,
+//     price_type: payload.priceType,
+//     max_deposit: payload.maxDeposit,
+//     max_rent: payload.maxRent,
+//     house_type: payload.houseType,
+//     additional_condition: payload.additionalCondition,
+//     room_count: payload.roomCount,
+//     bathroom_count: payload.bathroomCount,
+//   };
+// }
+
+function toCreateServerPayload(payload: FinderRequestCreatePayload) {
   return {
     preferred_region: payload.preferredRegion,
     price_type: payload.priceType,
-    max_deposit: payload.maxDeposit,
-    max_rent: payload.maxRent,
+    max_deposit: payload.maxDeposit ?? 0,
+    max_rent: payload.maxRent ?? 0,
     house_type: payload.houseType,
-    additional_condition: payload.additionalCondition,
-    room_count: payload.roomCount,
-    bathroom_count: payload.bathroomCount,
+    additional_condition: payload.additionalCondition ?? null,
+    status: "Y",
+  };
+}
+
+// Update 전용: 변경된 값만 보냄
+function toUpdateServerPayload(payload: FinderRequestUpdatePayload) {
+  return {
+    finder_request_id: payload.finder_request_id,
+
+    ...(payload.preferredRegion !== undefined && {
+      preferred_region: payload.preferredRegion,
+    }),
+    ...(payload.priceType !== undefined && {
+      price_type: payload.priceType,
+    }),
+    ...(payload.maxDeposit !== undefined && {
+      max_deposit: payload.maxDeposit,
+    }),
+    ...(payload.maxRent !== undefined && {
+      max_rent: payload.maxRent,
+    }),
+    ...(payload.houseType !== undefined && {
+      house_type: payload.houseType,
+    }),
+    ...(payload.additionalCondition !== undefined && {
+      additional_condition: payload.additionalCondition,
+    }),
+    ...(payload.status !== undefined && {
+      status: payload.status,
+    }),
   };
 }
 
@@ -110,7 +164,7 @@ export async function getFinderRequestById(
     return finderRequestStore;
   }
 
-  const res = await userStore.authFetch(`${BASE_PATH}/${id}`);
+  const res = await userStore.authFetch(`${BASE_PATH}/view/${id}`);
 
   if (res.status === 404) return null;
   if (res.status === 401) throw new Error("UNAUTHENTICATED");
@@ -127,24 +181,12 @@ export async function getFinderRequestById(
  */
 
 export async function createFinderRequest(
-  payload: FinderRequestPayload,
+  payload: FinderRequestCreatePayload,
 ): Promise<{ finder_request_id: number }> {
-  if (USE_MOCK) {
-    const id = Date.now();
-    finderRequestStore = {
-      finderRequestId: id,
-          status: "N",
-          ...payload,
-          maxDeposit: payload.maxDeposit ?? 0,
-          maxRent: payload.maxRent ?? 0,
-    };
-    return { finder_request_id: id };
-  }
-
   const res = await userStore.authFetch(`${BASE_PATH}/create`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(toServerPayload(payload)),
+    body: JSON.stringify(toCreateServerPayload(payload)),
   });
 
   if (!res.ok) throw new Error("FAILED_TO_CREATE_FINDER_REQUEST");
@@ -153,18 +195,13 @@ export async function createFinderRequest(
 
 export async function updateFinderRequest(
   id: number,
-  payload: Partial<FinderRequestPayload>,
+  payload: FinderRequestUpdatePayload,
 ): Promise<{ finder_request_id: number }> {
-  if (USE_MOCK) {
-    if (!finderRequestStore) return { finder_request_id: id };
-    finderRequestStore = { ...finderRequestStore, ...payload };
-    return { finder_request_id: finderRequestStore.finderRequestId };
-  }
 
-  const res = await userStore.authFetch(`${BASE_PATH}/edit/${id}`, {
+  const res = await userStore.authFetch(`${BASE_PATH}/edit`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(toServerPayload(payload)),
+    body: JSON.stringify(toUpdateServerPayload({ ...payload, finder_request_id: id })),
   });
 
   if (!res.ok) throw new Error("FAILED_TO_UPDATE_FINDER_REQUEST");
@@ -177,10 +214,14 @@ export async function deleteFinderRequest(id: number): Promise<boolean> {
     return true;
   }
 
-  const res = await userStore.authFetch(`${BASE_PATH}/delete/${id}`, {
-    method: "DELETE",
-  });
-
+  const res = await userStore.authFetch(
+    `${BASE_PATH}/delete?finder_request_id=${id}`,
+    {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+  
   if (res.status === 404) return false;
   if (!res.ok) throw new Error("FAILED_TO_DELETE_FINDER_REQUEST");
   return true;
