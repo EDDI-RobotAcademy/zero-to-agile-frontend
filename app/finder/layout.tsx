@@ -61,7 +61,7 @@ export default function FinderLayout({ children }: { children: ReactNode }) {
               내 의뢰서
             </Link>
             <Link href="/finder/listings" className="rounded px-3 py-2 hover:bg-blue-50">
-              추천 매물
+              위시리스트
             </Link>
             <Link href="/finder/contacts" className="rounded px-3 py-2 hover:bg-blue-50">
               임대인 컨택

@@ -60,14 +60,31 @@ export default function FinderRequestPage() {
  return (
     <main className="space-y-6">
       {/* 헤더 */}
-      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 via-white to-blue-50 p-6 shadow-sm ring-1 ring-slate-100">
-        <p className="text-sm font-semibold text-sky-700">의뢰서</p>
-        <h2 className="text-3xl font-bold text-slate-900">
-          내 매물 의뢰서
-        </h2>
-        <p className="text-sm text-slate-600">
-          작성한 의뢰서를 한눈에 확인할 수 있어요.
-        </p>
+      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 via-white to-blue-50 p-8 shadow-sm ring-1 ring-slate-100">
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-sky-700">의뢰서</p>
+            <div className="flex items-baseline gap-2">
+              <h2 className="text-3xl font-bold text-slate-900">
+                내 매물 의뢰서
+              </h2>
+              {!loading && requests.length > 0 && (
+                <span className="text-lg font-semibold text-sky-600">
+                  ({requests.length}개)
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-slate-600">
+              작성한 의뢰서를 한눈에 확인할 수 있어요.
+            </p>
+          </div>
+          <Button
+            onClick={() => router.push("/finder/request/new")}
+            className="rounded-xl px-5 py-2.5 text-sm shadow-sm"
+          >
+            + 새 의뢰서 작성
+          </Button>
+        </div>
       </div>
 
       {/* 에러 */}
@@ -104,7 +121,7 @@ export default function FinderRequestPage() {
             const statusLabel = STATUS_LABEL[request.status];
             const houseTypeLabel = HOUSE_TYPE_LABEL[request.houseType];
             const priceTypeLabel = PRICE_TYPE_LABEL[request.priceType];
-            
+
             return (
               <button
                 key={request.finderRequestId}
@@ -114,58 +131,70 @@ export default function FinderRequestPage() {
                 }
                 className="text-left"
               >
-                <div className="group rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+                <div className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg hover:border-blue-200">
                   {/* 상단 */}
-                  <div className="mb-3 flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-slate-900">
-                      의뢰서 #{request.finderRequestId}
-                    </h3>
-                    <span
-                      className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold
-                        ${
+                  <div className="border-b border-slate-100 bg-slate-50 px-4 py-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-base font-bold text-slate-900">
+                        의뢰서 #{request.finderRequestId}
+                      </h3>
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
                           request.status === "Y"
-                            ? "bg-blue-50 text-blue-700"
+                            ? "bg-blue-50 text-blue-700 ring-1 ring-blue-200"
                             : "bg-slate-100 text-slate-600"
-                        }
-                      `}
-                    >
-                      {statusLabel}
-                    </span>
+                        }`}
+                      >
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${
+                            request.status === "Y"
+                              ? "bg-blue-500 animate-pulse"
+                              : "bg-slate-400"
+                          }`}
+                        ></span>
+                        {statusLabel}
+                      </span>
+                    </div>
                   </div>
 
-                  {/* 요약 */}
-                  <div className="space-y-1 text-sm text-slate-700">
-                    <p>
-                      <span className="text-slate-500">지역 · </span>
+                  {/* 내용 */}
+                  <div className="space-y-3 p-4">
+                    {/* 지역 */}
+                    <div className="flex items-center gap-2 text-sm text-slate-600">
+                      <span className="text-base">🗺️</span>
                       {request.preferredRegion}
-                    </p>
+                    </div>
 
-                    <p>
-                      <span className="text-slate-500">임대 유형 · </span>
-                      {priceTypeLabel}
-                      {request.priceType === "MONTHLY" && (
-                          <span className="text-slate-600">
-                            {" "}
-                            ({Number(request.maxRent ?? 0).toLocaleString()}원 이하)
+                    {/* 부동산 유형 + 임대 유형 */}
+                    <div className="flex items-center gap-2 text-sm text-slate-700">
+                      <span className="text-base">🏠</span>
+                      {houseTypeLabel} · {priceTypeLabel}
+                    </div>
+
+                    {/* 금액 강조 */}
+                    <div className="flex items-baseline gap-2 border-t border-slate-100 pt-3">
+                      <span className="text-base">💰</span>
+                      <div>
+                        <p className="text-xs text-slate-500">보증금</p>
+                        <p className="text-lg font-bold text-slate-900">
+                          {Number(request.maxDeposit ?? 0).toLocaleString()}
+                          <span className="ml-1 text-sm font-normal text-slate-500">
+                            원
                           </span>
-                        )}
-                    </p>
-
-                    <p>
-                      <span className="text-slate-500">부동산 유형 · </span>
-                      {houseTypeLabel}
-                    </p>
-
-                    <p>
-                      <span className="text-slate-500">최대 보증금 · </span>
-                      {Number(request.maxDeposit ?? 0).toLocaleString()} 원
-                    </p>
-                  </div>
-
-                  <div className="mt-3 flex justify-end">
-                    <span className="pr-2 text-xs text-slate-400 transition group-hover:text-slate-600">
-                      클릭하여 상세보기 →
-                    </span>
+                        </p>
+                      </div>
+                      {request.priceType === "MONTHLY" && (
+                        <div className="ml-auto">
+                          <p className="text-xs text-slate-500">월세</p>
+                          <p className="text-lg font-bold text-blue-600">
+                            {Number(request.maxRent ?? 0).toLocaleString()}
+                            <span className="ml-1 text-sm font-normal text-slate-500">
+                              원
+                            </span>
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </button>
