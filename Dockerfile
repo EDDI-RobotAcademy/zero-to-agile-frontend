@@ -1,5 +1,6 @@
 # Base image를 ARM64로 명시
-FROM --platform=linux/arm64 node:20-alpine
+#FROM --platform=linux/arm64 node:20-alpine
+FROM node:20-bookworm-slim
 
 # 작업 디렉토리 설정
 WORKDIR /app
@@ -10,6 +11,16 @@ RUN npm install --frozen-lockfile --loglevel=error
 
 # 앱 코드 복사
 COPY . .
+
+# ✅ [ADD] GitHub Actions build-arg를 Dockerfile에서 받기
+ARG NEXT_PUBLIC_GOOGLE_LOGIN_PATH
+ARG NEXT_PUBLIC_API_BASE_URL
+ARG NEXT_PUBLIC_GTM_ID
+
+# ✅ [ADD] next build가 process.env로 읽을 수 있게 환경변수로 노출
+ENV NEXT_PUBLIC_GOOGLE_LOGIN_PATH=$NEXT_PUBLIC_GOOGLE_LOGIN_PATH
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_GTM_ID=$NEXT_PUBLIC_GTM_ID
 
 # Next.js 빌드
 RUN npm run build

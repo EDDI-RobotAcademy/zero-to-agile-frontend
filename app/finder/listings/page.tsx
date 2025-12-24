@@ -34,11 +34,14 @@ export default function FinderListingsPage() {
       try {
         const summaries = await listFinderRequests();
         if (summaries.length) {
-          const detail = await getFinderRequestById(summaries[0].id);
-          setRequest(detail);
-          const rec = await listRecommendedListings(detail ?? undefined);
-          setListings(rec);
-          return;
+          const targetId = summaries[0]?.id ?? summaries[0]?.finderRequestId;
+          if (targetId !== undefined) {
+            const detail = await getFinderRequestById(targetId);
+            setRequest(detail);
+            const rec = await listRecommendedListings(detail ?? undefined);
+            setListings(rec);
+            return;
+          }
         }
         const rec = await listRecommendedListings(undefined);
         setListings(rec);
@@ -63,8 +66,13 @@ export default function FinderListingsPage() {
           <h2 className="text-2xl font-bold">추천 매물</h2>
           {request ? (
             <p className="text-sm text-gray-600">
-              {request.preferredArea} · {RESIDENCE_LABEL[request.residenceType] ?? request.residenceType} ·{' '}
-              {DEAL_LABEL[request.dealType] ?? request.dealType}
+              {request.preferredArea} ·{' '}
+              {request.residenceType
+                  ? (RESIDENCE_LABEL[request.residenceType] ?? request.residenceType)
+                  : '-'} ·{' '}
+              {request.dealType
+                  ? (DEAL_LABEL[request.dealType] ?? request.dealType)
+                  : '-'}
             </p>
           ) : (
             <p className="text-sm text-gray-600">의뢰서 없이 기본 추천이 표시됩니다.</p>

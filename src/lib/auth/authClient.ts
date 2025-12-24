@@ -6,17 +6,23 @@
  * - Access Token은 메모리/상태에 보관하고 Authorization 헤더로 붙입니다.
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+
+// function getApiBase(): string {
+//   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+//   // 백엔드 기본 포트: 33333 (env를 덮어쓸 수 있음)
+//   const base = API_BASE_URL;
+//   return `${base}/api`;
+// }
 
 function getApiBase(): string {
-  // 백엔드 기본 포트: 33333 (env를 덮어쓸 수 있음)
-  const base = API_BASE_URL;
-  return `${base}/api`;
+  return "/api";
 }
 
 function withApiBase(path: string) {
   if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  return `${getApiBase()}${path}`;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${getApiBase()}${normalizedPath}`;
 }
 
 export function redirectToGoogleLogin(userType: "finder" | "owner") {

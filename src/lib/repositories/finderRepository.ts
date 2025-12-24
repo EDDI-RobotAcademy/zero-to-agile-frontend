@@ -1,144 +1,164 @@
-import { USE_MOCK } from '@/config/env';
-import { finderRequestMock } from '@/mocks/finder/request.mock';
-import { ContactRequest, ContactStatus } from '@/types/contact';
+import { USE_MOCK } from "@/config/env";
+import { finderRequestMock } from "@/mocks/finder/request.mock";
 import {
   FinderRequestDetail,
   FinderRequestPayload,
   FinderRequestSummary,
-} from '@/types/finder';
-import { userStore } from '../auth/userStore';
+  PriceType,
+  HouseType,
+  FinderRequestStatus,
+} from "@/types/finder";
+import { ContactRequest, ContactStatus } from "@/types/contact";
+import { userStore } from "../auth/userStore";
 import {
   addContact,
   getContactsByFinder,
   updateContactStatus,
-} from './contactStore';
+} from "./contactStore";
 
-const BASE_PATH = '/requests';
+const BASE_PATH = "/requests";
+
+/**
+ * mock 저장소
+ */
 let finderRequestStore: FinderRequestDetail | null = finderRequestMock;
 
-const RESIDENCE_TYPE_KO_MAP: Record<string, string> = {
-  apartment: '아파트',
-  officetel: '오피스텔',
-  villa: '빌라',
-  house: '단독주택',
-  commercial: '상가',
-};
+/**
+ * ======================================================
+ * Mapper (server → frontend)
+ * - snake_case → camelCase
+ * ======================================================
+ */
 
-const DEAL_TYPE_KO_MAP: Record<string, string> = {
-  jeonse: '전세',
-  sale: '매매',
-  monthly: '월세',
-};
-
-function toKoreanResidenceType(value?: string) {
-  if (!value) return value;
-  return RESIDENCE_TYPE_KO_MAP[value] ?? value;
-}
-
-function toKoreanDealType(value?: string) {
-  if (!value) return value;
-  return DEAL_TYPE_KO_MAP[value] ?? value;
-}
-
-function toEnglishResidenceType(value?: string): string {
-  if (!value) return '';
-  const entry = Object.entries(RESIDENCE_TYPE_KO_MAP).find(([, ko]) => ko === value);
-  return entry ? entry[0] : value;
-}
-
-function toEnglishDealType(value?: string): string {
-  if (!value) return '';
-  const entry = Object.entries(DEAL_TYPE_KO_MAP).find(([, ko]) => ko === value);
-  return entry ? entry[0] : value;
-}
-
-function toDetail(data: any): FinderRequestDetail {
+function toFinderRequestSummary(data: any): FinderRequestSummary {
   return {
-    id: data.finder_request_id ?? data.id,
-    finderId: data.finder_id,
-    preferredArea: data.preferred_area ?? data.prefered_area,
-    residenceType: toEnglishResidenceType(data.residence_type),
-    dealType: toEnglishDealType(data.deal_type),
+    id: Number(data.id ?? data.finder_request_id ?? 0),  // 추가
+    finderRequestId: data.finder_request_id,
+    preferredRegion: data.preferred_region ?? "",
+    priceType: data.price_type as PriceType,
+    maxDeposit: data.max_deposit ?? 0,
+    maxRent: data.max_rent ?? 0,
+    houseType: data.house_type as HouseType,
+    status: (data.status ?? "N") as FinderRequestStatus,
+  };
+}
+
+function toFinderRequestDetail(data: any): FinderRequestDetail {
+  return {
+    id: Number(data.id ?? data.finder_request_id ?? 0),  // 추가
+    finderId: data.finder_id ?? data.finderId,           // 추가(있으면 매핑)
+
+    finderRequestId: data.finder_request_id,
+    preferredRegion: data.preferred_region ?? "",
+    priceType: data.price_type as PriceType,
+    maxDeposit: data.max_deposit ?? 0,
+    maxRent: data.max_rent ?? 0,
+    houseType: data.house_type as HouseType,
+    status: (data.status ?? "N") as FinderRequestStatus,
+
+    // UI에서 쓰는 값들(있으면 매핑되게)
+    preferredArea: data.preferred_area,
+    residenceType: data.residence_type,
+    dealType: data.deal_type,
     budget: data.budget,
-    area: data.area ?? data.min_area,
+    area: data.area,
+
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+    additionalCondition: data.additional_condition,
     roomCount: data.room_count,
     bathroomCount: data.bathroom_count,
   };
 }
 
-function toSummary(data: any): FinderRequestSummary {
+/**
+ * ======================================================
+ * Mapper (frontend → server)
+ * - camelCase → snake_case
+ * ======================================================
+ */
+function toServerPayload(
+  payload: Partial<FinderRequestPayload>,
+): Record<string, any> {
   return {
-    id: data.finder_request_id ?? data.id,
-    preferredArea: data.preferred_area ?? data.prefered_area,
-    residenceType: toEnglishResidenceType(data.residence_type),
-    dealType: toEnglishDealType(data.deal_type),
-    budget: data.budget,
+    preferred_region: payload.preferredRegion,
+    price_type: payload.priceType,
+    max_deposit: payload.maxDeposit,
+    max_rent: payload.maxRent,
+    house_type: payload.houseType,
+    additional_condition: payload.additionalCondition,
+    room_count: payload.roomCount,
+    bathroom_count: payload.bathroomCount,
   };
 }
 
-function toServerPayload(payload: Partial<FinderRequestPayload>) {
-  const map: Record<string, any> = {};
-  if (payload.preferredArea !== undefined) map.preferred_area = payload.preferredArea;
-  if (payload.residenceType !== undefined) map.residence_type = toKoreanResidenceType(payload.residenceType);
-  if (payload.dealType !== undefined) map.deal_type = toKoreanDealType(payload.dealType);
-  if (payload.budget !== undefined) map.budget = payload.budget;
-  if (payload.area !== undefined) map.area = payload.area;
-  if (payload.roomCount !== undefined) map.room_count = payload.roomCount;
-  if (payload.bathroomCount !== undefined) map.bathroom_count = payload.bathroomCount;
-  return map;
-}
+/**
+ * ======================================================
+ * 조회 API
+ * ======================================================
+ */
 
 export async function listFinderRequests(): Promise<FinderRequestSummary[]> {
   if (USE_MOCK) {
-    return finderRequestStore ? [toSummary(finderRequestStore)] : [];
+    return finderRequestStore
+      ? [toFinderRequestSummary(finderRequestStore)]
+      : [];
   }
 
-  const res = await userStore.authFetch((`${BASE_PATH}/view`)); // view
-  if (res.status === 401) throw new Error('UNAUTHENTICATED');
-  if (!res.ok) {
-    throw new Error('failed to fetch finder requests');
-  }
+  const res = await userStore.authFetch(`${BASE_PATH}/view`);
+
+  if (res.status === 401) throw new Error("UNAUTHENTICATED");
+  if (!res.ok) throw new Error("FAILED_TO_FETCH_FINDER_REQUESTS");
+
   const data = await res.json();
-  return Array.isArray(data) ? data.map(toSummary) : [];
+  return Array.isArray(data) ? data.map(toFinderRequestSummary) : [];
 }
 
-export async function getFinderRequestById(id: number | string): Promise<FinderRequestDetail | null> {
+export async function getFinderRequestById(
+  id: number,
+): Promise<FinderRequestDetail | null> {
   if (USE_MOCK) {
     return finderRequestStore;
   }
 
   const res = await userStore.authFetch(`${BASE_PATH}/${id}`);
+
   if (res.status === 404) return null;
-  if (res.status === 401) throw new Error('UNAUTHENTICATED');
-  if (!res.ok) {
-    throw new Error('failed to fetch finder request');
-  }
+  if (res.status === 401) throw new Error("UNAUTHENTICATED");
+  if (!res.ok) throw new Error("FAILED_TO_FETCH_FINDER_REQUEST_DETAIL");
+
   const data = await res.json();
-  return toDetail(data);
+  return toFinderRequestDetail(data);
 }
+
+/**
+ * ======================================================
+ * Create, Update, Delete
+ * ======================================================
+ */
 
 export async function createFinderRequest(
   payload: FinderRequestPayload,
 ): Promise<{ finder_request_id: number }> {
   if (USE_MOCK) {
-    const id = finderRequestStore?.id ?? Date.now();
-    finderRequestStore = { id, ...payload };
+    const id = Date.now();
+    finderRequestStore = {
+      finderRequestId: id,
+          status: "N",
+          ...payload,
+          maxDeposit: payload.maxDeposit ?? 0,
+          maxRent: payload.maxRent ?? 0,
+    };
     return { finder_request_id: id };
   }
 
   const res = await userStore.authFetch(`${BASE_PATH}/create`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(toServerPayload(payload)),
   });
 
-  if (res.status === 400 || res.status === 401) {
-    const err = await res.json();
-    throw new Error(err?.detail ?? 'failed to create finder request');
-  }
-  if (!res.ok) {
-    throw new Error('failed to create finder request');
-  }
+  if (!res.ok) throw new Error("FAILED_TO_CREATE_FINDER_REQUEST");
   return res.json();
 }
 
@@ -149,22 +169,16 @@ export async function updateFinderRequest(
   if (USE_MOCK) {
     if (!finderRequestStore) return { finder_request_id: id };
     finderRequestStore = { ...finderRequestStore, ...payload };
-    return { finder_request_id: finderRequestStore.id };
+    return { finder_request_id: finderRequestStore.finderRequestId };
   }
 
-  const res = await userStore.authFetch(`${BASE_PATH}/edit/${id}`, { // edit
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+  const res = await userStore.authFetch(`${BASE_PATH}/edit/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(toServerPayload(payload)),
   });
 
-  if (res.status === 404 || res.status === 401 || res.status === 400) {
-    const err = await res.json();
-    throw new Error(err?.detail ?? 'failed to update finder request');
-  }
-  if (!res.ok) {
-    throw new Error('failed to update finder request');
-  }
+  if (!res.ok) throw new Error("FAILED_TO_UPDATE_FINDER_REQUEST");
   return res.json();
 }
 
@@ -174,16 +188,24 @@ export async function deleteFinderRequest(id: number): Promise<boolean> {
     return true;
   }
 
-  const res = await userStore.authFetch(`${BASE_PATH}/delete/${id}`, { method: 'DELETE' }); // delete
+  const res = await userStore.authFetch(`${BASE_PATH}/delete/${id}`, {
+    method: "DELETE",
+  });
+
   if (res.status === 404) return false;
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err?.detail ?? 'failed to delete finder request');
-  }
+  if (!res.ok) throw new Error("FAILED_TO_DELETE_FINDER_REQUEST");
   return true;
 }
 
-export async function getFinderContacts(finderId: string): Promise<ContactRequest[]> {
+/**
+ * ======================================================
+ * Contact 연관 (추후 수정)
+ * ======================================================
+ */
+
+export async function getFinderContacts(
+  finderId: string,
+): Promise<ContactRequest[]> {
   return getContactsByFinder(finderId);
 }
 

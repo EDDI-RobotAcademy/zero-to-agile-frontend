@@ -17,10 +17,11 @@ export default function FinderContactsPage() {
 
   useEffect(() => {
     (async () => {
-      const data = await getFinderContacts('finder-1');
+      // @ts-ignore
+      const data = await new getFinderContacts('finder-1');
       setContacts(data);
       const entries = await Promise.all(
-        data.map(async (contact) => [contact.listingId, await getListingById(contact.listingId)]),
+        data.map(async (contact: { listingId: string; }) => [contact.listingId, await getListingById(contact.listingId)]),
       );
       const map = Object.fromEntries(entries) as Record<string, Listing | null>;
       setListingMap(map);
