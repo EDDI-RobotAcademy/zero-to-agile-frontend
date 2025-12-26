@@ -147,7 +147,7 @@ export default function FinderRequestDetailPage() {
 
           {/* CTA 버튼 영역 - 핵심 액션 */}
           <button
-            onClick={() => router.push('/finder/listings')}
+            onClick={() => router.push('/finder/recommendations')}
             className="group w-full overflow-hidden rounded-3xl bg-gradient-to-r from-blue-500 to-sky-400 px-8 py-5 text-center shadow-xl ring-1 ring-blue-400 transition hover:-translate-y-1 hover:shadow-2xl"
           >
             <div className="flex items-center justify-center gap-3">
@@ -221,36 +221,6 @@ export default function FinderRequestDetailPage() {
                   </h3>
                 </div>
 
-                {/* 방/욕실 개수 */}
-                {(request.roomCount || request.bathroomCount) && (
-                  <div className="mb-6 flex gap-6">
-                    {request.roomCount && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl">🛏️</span>
-                        <p className="text-sm font-semibold text-slate-500">방</p>
-                        <p className="text-lg font-bold text-slate-900">
-                          {request.roomCount}
-                          <span className="ml-0.5 text-sm font-normal text-slate-600">
-                            개
-                          </span>
-                        </p>
-                      </div>
-                    )}
-
-                    {request.bathroomCount && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl">🚿</span>
-                        <p className="text-sm font-semibold text-slate-500">욕실</p>
-                        <p className="text-lg font-bold text-slate-900">
-                          {request.bathroomCount}
-                          <span className="ml-0.5 text-sm font-normal text-slate-600">
-                            개
-                          </span>
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
 
                 {/* 추가 조건 - 말풍선 느낌 */}
                 {request.additionalCondition && (

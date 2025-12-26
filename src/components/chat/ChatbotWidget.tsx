@@ -1,8 +1,7 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useRole } from "@/lib/auth/roleContext";
-import { Button } from "@/components/common/Button";
 
 type Message = {
   id: string;
@@ -25,7 +24,12 @@ export function ChatbotWidget() {
   useEffect(() => {
     if (!isOpen) return;
     if (messages.length === 0) {
-      setMessages([createMessage("bot", "안녕하세요! 찾고 계신 매물 조건을 자유롭게 말씀해주세요.")]);
+      setMessages([
+        createMessage(
+          "bot",
+          "안녕하세요! 이 매물에 대해 궁금한 점이 있으신가요?",
+        ),
+      ]);
     }
   }, [isOpen, messages.length]);
 
@@ -39,7 +43,10 @@ export function ChatbotWidget() {
     const trimmed = input.trim();
     if (!trimmed || isLoading) return;
     if (!isAuthenticated) {
-      setMessages((prev) => [...prev, createMessage("bot", "로그인 후 챗봇을 사용할 수 있습니다.")]);
+      setMessages((prev) => [
+        ...prev,
+        createMessage("bot", "챗봇을 사용하려면 로그인해 주세요."),
+      ]);
       return;
     }
 
@@ -57,19 +64,19 @@ export function ChatbotWidget() {
 
       if (!res.ok) {
         const errText = await res.text();
-        throw new Error(errText || "챗봇 응답을 가져오지 못했습니다.");
+        throw new Error(errText || "챗봇 요청에 실패했습니다.");
       }
 
       const data = await res.json();
       const replyText =
         typeof data?.response === "string"
           ? data.response
-          : "응답을 가져오지 못했습니다. 잠시 후 다시 시도해주세요.";
+          : "응답을 해석하지 못했습니다.";
       setMessages((prev) => [...prev, createMessage("bot", replyText)]);
     } catch (err: any) {
       setMessages((prev) => [
         ...prev,
-        createMessage("bot", err?.message ?? "오류가 발생했습니다. 다시 시도해주세요."),
+        createMessage("bot", err?.message ?? "문제가 발생했습니다."),
       ]);
     } finally {
       setIsLoading(false);
@@ -78,52 +85,94 @@ export function ChatbotWidget() {
 
   return (
     <div
-      className="z-50 flex flex-col items-end gap-2 md:gap-3"
+      className="z-50 flex flex-col items-end gap-3"
       style={{
         position: "fixed",
-        bottom: "60px",
-        right: "60px",
+        bottom: "24px",
+        right: "24px",
       }}
     >
       {isOpen && (
-        <div className="mb-3 flex w-80 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl">
-          <div className="flex items-center justify-between bg-slate-800 px-4 py-3 text-white">
-            <div>
-              <p className="text-sm font-semibold">매물 챗봇</p>
-              <p className="text-xs text-slate-200">의뢰 내용/조건을 입력하면 도와드려요</p>
+        <div className="mb-2 flex w-96 flex-col overflow-hidden rounded-3xl border-2 border-blue-100 bg-white shadow-2xl ring-1 ring-slate-200">
+          {/* 헤더 */}
+          <div className="bg-gradient-to-r from-blue-500 via-blue-600 to-sky-500 px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+                  <span className="text-2xl">🤖</span>
+                </div>
+                <div>
+                  <p className="text-base font-bold text-white">AI 파인더 챗봇</p>
+                  <p className="text-xs text-blue-100">
+                    궁금한 점을 편하게 물어보세요
+                  </p>
+                </div>
+              </div>
+              <button
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/30"
+                onClick={() => setIsOpen(false)}
+                aria-label="챗봇 닫기"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
             </div>
-            <button
-              className="rounded-full p-1 text-slate-200 transition hover:bg-slate-700 hover:text-white"
-              onClick={() => setIsOpen(false)}
-              aria-label="chatbot close"
-            >
-              ✕
-            </button>
           </div>
 
+          {/* 메시지 영역 */}
           <div
             ref={viewportRef}
-            className="flex h-80 flex-col gap-3 overflow-y-auto bg-slate-50 px-4 py-3"
+            className="flex h-96 flex-col gap-3 overflow-y-auto bg-gradient-to-b from-slate-50 to-blue-50/30 px-5 py-4"
           >
             {messages.map((msg) => (
               <div
                 key={msg.id}
                 className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
               >
+                {msg.sender === "bot" && (
+                  <div className="mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 shadow-md">
+                    <span className="text-base">🤖</span>
+                  </div>
+                )}
                 <div
-                  className={`max-w-[85%] rounded-lg px-3 py-2 text-sm shadow-sm ${
+                  className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-md ${
                     msg.sender === "user"
-                      ? "bg-blue-600 text-white"
-                      : "border border-slate-200 bg-white text-slate-800"
+                      ? "bg-gradient-to-br from-blue-600 to-blue-700 font-medium text-white"
+                      : "border-2 border-blue-100 bg-white font-medium text-slate-800"
                   }`}
                 >
                   {msg.text}
                 </div>
               </div>
             ))}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="mr-2 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 shadow-md">
+                  <span className="text-base">🤖</span>
+                </div>
+                <div className="max-w-[75%] rounded-2xl border-2 border-blue-100 bg-white px-4 py-3">
+                  <div className="flex gap-1">
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-blue-500" style={{ animationDelay: "0ms" }}></span>
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-blue-500" style={{ animationDelay: "150ms" }}></span>
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-blue-500" style={{ animationDelay: "300ms" }}></span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="border-t border-slate-200 bg-white p-3">
+          {/* 입력 영역 */}
+          <div className="border-t-2 border-blue-100 bg-white p-4">
             <div className="flex items-center gap-2">
               <input
                 type="text"
@@ -136,54 +185,45 @@ export function ChatbotWidget() {
                   }
                 }}
                 disabled={isLoading}
-                placeholder={isLoading ? "응답을 기다리는 중입니다..." : "메시지를 입력하세요"}
-                className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-100"
+                placeholder={
+                  isLoading ? "답변을 작성 중이에요..." : "메시지를 입력하세요..."
+                }
+                className="flex-1 rounded-xl border-2 border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium transition focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
               />
-              <Button onClick={handleSend} disabled={isLoading || !input.trim()}>
-                {isLoading ? "응답 중..." : "전송"}
-              </Button>
+              <button
+                onClick={handleSend}
+                disabled={isLoading || !input.trim()}
+                className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-md transition hover:from-blue-700 hover:to-blue-800 disabled:from-slate-300 disabled:to-slate-400"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
       )}
 
+      {/* 플로팅 버튼 */}
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        aria-label={isOpen ? "채팅 닫기" : "채팅 열기"}
-        className="relative flex h-20 w-20 items-center justify-center rounded-full border border-black/30 bg-white text-black shadow-xl shadow-black/20 ring-1 ring-black/20 ring-offset-1 ring-offset-white transition hover:-translate-y-0.5 hover:bg-slate-100 focus:outline-none focus:ring-4 focus:ring-black/30"
+        aria-label={isOpen ? "챗봇 닫기" : "챗봇 열기"}
+        className="group relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-600 to-blue-700 shadow-2xl shadow-blue-500/50 ring-2 ring-blue-400/50 ring-offset-2 ring-offset-white transition hover:scale-110 hover:from-blue-700 hover:to-blue-800 hover:shadow-blue-600/60 focus:outline-none focus:ring-4 focus:ring-blue-400/50"
       >
-        {isOpen ? (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="100"
-            height="100"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="black"
-            strokeWidth={3}
-            className="drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        ) : (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="100"
-            height="100"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="black"
-            strokeWidth={2.4}
-            className="drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]"
-          >
-            <path
-              d="M4.75 5.5A1.75 1.75 0 0 1 6.5 3.75h11A1.75 1.75 0 0 1 19.25 5.5v8.25A1.75 1.75 0 0 1 17.5 15.5H10l-3.3 2.7c-.33.27-.83.04-.83-.38V5.5Z"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path d="M8.5 9h7M8.5 12h5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+          <span className="text-3xl group-hover:scale-110 transition">🤖</span>
+        </div>
+        {!isOpen && (
+          <div className="absolute -top-12 right-0 whitespace-nowrap rounded-lg bg-slate-800 px-3 py-2 text-xs font-semibold text-white opacity-0 shadow-lg transition group-hover:opacity-100">
+            AI 챗봇과 대화하기
+            <div className="absolute -bottom-1 right-4 h-2 w-2 rotate-45 bg-slate-800"></div>
+          </div>
         )}
       </button>
     </div>
