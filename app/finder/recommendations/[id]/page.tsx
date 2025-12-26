@@ -75,18 +75,7 @@ export default function RecommendationDetailPage() {
   const riskConfig = listing.riskLevel ? RISK_LEVEL_CONFIG[listing.riskLevel] : null;
 
   const handleSaveToWishlist = async () => {
-    if (!listing) return;
-
-    try {
-      setIsSaving(true);
-      const housePlatformId = Number(listing.id);
-      await addToWishlist(housePlatformId);
-      alert('위시리스트에 추가되었습니다! 🎉');
-    } catch (err: any) {
-      alert(err?.message ?? '위시리스트 저장에 실패했습니다.');
-    } finally {
-      setIsSaving(false);
-    }
+    alert('이 기능은 아직 준비중입니다.');
   };
 
   return (
@@ -199,11 +188,11 @@ export default function RecommendationDetailPage() {
                 </span>
                 <span className="text-2xl font-bold text-slate-900">원</span>
               </div>
-              {listing.monthlyRent && (
+              {(listing.monthlyRent ?? 0) > 0 && (
                 <div className="flex flex-wrap items-baseline gap-2">
                   <span className="text-base font-semibold text-slate-700">월세</span>
                   <span className="text-3xl font-bold text-blue-700">
-                    {listing.monthlyRent.toLocaleString()}
+                    {listing.monthlyRent!.toLocaleString()}
                   </span>
                   <span className="text-xl font-semibold text-blue-700">원</span>
                 </div>
@@ -257,6 +246,79 @@ export default function RecommendationDetailPage() {
                       </p>
                     )}
                   </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 기본 제공 가전 & 관리비 정보 */}
+      <div className="overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-slate-200">
+        <div className="border-b border-slate-100 bg-slate-50 px-6 py-4">
+          <h2 className="text-lg font-bold text-slate-900">📋 추가 정보</h2>
+        </div>
+        <div className="p-6">
+          <div className="space-y-5">
+            {/* 기본 제공 가전 */}
+            {listing.options && listing.options.some(opt =>
+              opt === '에어컨' || opt === '냉장고' || opt === '세탁기'
+            ) && (
+              <div>
+                <p className="mb-2 text-sm font-semibold text-slate-600">🔌 기본 제공 가전</p>
+                <div className="flex flex-wrap gap-2">
+                  {listing.options.filter(opt =>
+                    opt === '에어컨' || opt === '냉장고' || opt === '세탁기'
+                  ).map((item, index) => (
+                    <span
+                      key={index}
+                      className="rounded-lg bg-blue-100 px-3 py-1.5 text-sm font-medium text-blue-800"
+                    >
+                      ✓ {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 관리비 포함 항목 */}
+            {listing.options && listing.options.some(opt =>
+              opt.includes('관리비') || opt.includes('일반')
+            ) && (
+              <div>
+                <p className="mb-2 text-sm font-semibold text-slate-600">✅ 관리비 포함 항목</p>
+                <div className="flex flex-wrap gap-2">
+                  {listing.options.filter(opt =>
+                    opt.includes('관리비') || opt.includes('일반')
+                  ).map((item, index) => (
+                    <span
+                      key={index}
+                      className="rounded-lg bg-green-100 px-3 py-1.5 text-sm font-medium text-green-800"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 관리비 제외 항목 */}
+            {listing.options && listing.options.some(opt =>
+              opt === '전기' || opt === '가스' || opt === '수도' || opt === '인터넷'
+            ) && (
+              <div>
+                <p className="mb-2 text-sm font-semibold text-slate-600">❌ 관리비 제외 항목 (별도 납부)</p>
+                <div className="flex flex-wrap gap-2">
+                  {listing.options.filter(opt =>
+                    opt === '전기' || opt === '가스' || opt === '수도' || opt === '인터넷' || opt === 'TV' || opt === '난방'
+                  ).map((item, index) => (
+                    <span
+                      key={index}
+                      className="rounded-lg bg-red-100 px-3 py-1.5 text-sm font-medium text-red-800"
+                    >
+                      {item}
+                    </span>
+                  ))}
                 </div>
               </div>
             )}

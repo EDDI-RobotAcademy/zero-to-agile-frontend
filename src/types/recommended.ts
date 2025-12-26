@@ -25,24 +25,26 @@ export interface HouseDetail {
   deposit: number;
   monthly_rent?: number;
   manage_cost?: number;
-  room_type: string; // "오피스텔", "아파트", "빌라" 등
+  room_type: string; // "투룸", "쓰리룸", "오픈형원룸" 등
+  residence_type?: string; // "단독주택", "공동주택", "도시형생활주택", "오피스텔" 등
   contract_area?: number;
   exclusive_area?: number;
   floor?: number;
   all_floors?: number;
   address: string;
-  address_1?: string; // 시/도
-  address_2?: string; // 구
-  address_3?: string; // 동
-  address_4?: string; // 번지
-  address_5?: string; // 호
   lat_lng?: { lat: number; lng: number };
   can_park?: boolean;
   has_elevator?: boolean;
   image_urls?: string[];
-  is_jeonse_loan_possible?: boolean;
   created_at?: string;
   updated_at?: string;
+  // 새로운 필드들
+  built_in?: string[]; // 기본 제공 가전 (에어컨, 냉장고, 세탁기 등)
+  near_mart?: boolean; // 마트 근처 여부
+  near_univ?: boolean; // 대학 근처 여부
+  near_transport?: boolean; // 교통 근처 여부
+  management_excluded?: string[]; // 관리비에 포함되지 않는 항목
+  management_included?: string[]; // 관리비에 포함되는 항목
 }
 
 export interface RecommendationResult {

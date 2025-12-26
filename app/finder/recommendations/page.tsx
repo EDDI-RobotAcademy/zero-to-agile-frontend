@@ -3,10 +3,11 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/common/Button';
-import { listRecommendations } from '@/lib/repositories/recommendRepository';
+import { listRecommendations, toRecommendedListing } from '@/lib/repositories/recommendRepository';
 import { getFinderRequestById, listFinderRequests } from '@/lib/repositories/finderRepository';
-import { RecommendedListing, RiskLevel } from '@/types/recommended';
+import { RecommendedListing, RiskLevel, RecommendationResult } from '@/types/recommended';
 import { FinderRequestDetail } from '@/types/finder';
+import { USE_MOCK } from '@/config/env';
 
 type TaskStatus = 'IDLE' | 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'TIMEOUT' | 'ERROR';
 
@@ -54,18 +55,30 @@ export default function FinderRecommendationsPage() {
     // isMounted를 항상 true로 초기화 (cleanup 후 재마운트 대비)
     isMountedRef.current = true;
 
-    // requestId가 있으면 큐 처리 (폴링)
+    // requestId가 있으면 처리
     if (requestId && !hasStartedRef.current) {
       hasStartedRef.current = true;
 
       async function startRecommendation() {
         try {
           setLoading(true);
-          setTaskStatus('QUEUED');
 
           // 의뢰서 정보 가져오기
           const detail = await getFinderRequestById(Number(requestId));
           setRequest(detail);
+
+          // 목 데이터 모드면 바로 목 데이터 로드
+          if (USE_MOCK) {
+            console.log('[DEBUG] 목 데이터 모드 - 폴링 건너뛰고 바로 데이터 로드');
+            const rec = await listRecommendations(detail);
+            setListings(rec);
+            setTaskStatus('COMPLETED');
+            setLoading(false);
+            return;
+          }
+
+          // 실제 API 모드: 큐 처리 (폴링)
+          setTaskStatus('QUEUED');
 
           // 1️⃣ 추천 요청 (큐에 작업 추가)
           console.log('[DEBUG] 추천 요청 시작, requestId:', requestId);
@@ -107,7 +120,10 @@ export default function FinderRecommendationsPage() {
 
             if (pollData.status === 'COMPLETED') {
               // 결과가 응답에 포함되어 있음
-              setListings(pollData.result || []);
+              // API 응답 형식: { status: 'COMPLETED', result: { results: RecommendationResult[] } }
+              const results: RecommendationResult[] = pollData.result?.results || [];
+              const mappedListings = results.map(toRecommendedListing);
+              setListings(mappedListings);
               setTaskStatus('COMPLETED');
               setLoading(false);
               break;
@@ -292,7 +308,7 @@ export default function FinderRecommendationsPage() {
                 <div className="grid gap-6 md:grid-cols-3">
                   {/* 이미지 */}
                   <div className="md:col-span-1">
-                    <div className="h-full w-full overflow-hidden rounded-2xl shadow-md">
+                    <div className="h-48 w-full overflow-hidden rounded-2xl shadow-md">
                       <img
                         src={listing.images[0] || 'https://picsum.photos/seed/default/600/400'}
                         alt={listing.title}
@@ -319,9 +335,9 @@ export default function FinderRecommendationsPage() {
                         <span className="text-2xl font-bold text-blue-900">
                           {listing.price.toLocaleString()}원
                         </span>
-                        {listing.monthlyRent && (
+                        {(listing.monthlyRent ?? 0) > 0 && (
                           <span className="text-lg text-blue-700">
-                            / 월 {listing.monthlyRent.toLocaleString()}원
+                            / 월 {listing.monthlyRent!.toLocaleString()}원
                           </span>
                         )}
                       </div>

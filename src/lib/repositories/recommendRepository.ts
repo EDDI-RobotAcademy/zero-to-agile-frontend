@@ -9,15 +9,20 @@ const BASE_PATH = '/finder/recommendations';
 
 let recommendedListingStore: RecommendedListing[] = [];
 
-function mapRoomType(roomType: string): Listing['type'] {
+function mapResidenceType(residenceType?: string): Listing['type'] {
+  if (!residenceType) return 'apartment';
+
   const typeMap: Record<string, Listing['type']> = {
-    '아파트': 'apartment',
     '오피스텔': 'officetel',
+    '아파트': 'apartment',
+    '공동주택': 'apartment',
     '빌라': 'villa',
     '단독주택': 'house',
+    '다세대주택': 'villa',
+    '도시형생활주택': 'officetel',
     '상가': 'commercial',
   };
-  return typeMap[roomType] ?? 'apartment';
+  return typeMap[residenceType] ?? 'apartment';
 }
 
 function mapSalesType(salesType: string): Listing['contractType'] {
@@ -38,17 +43,18 @@ function calculateRiskLevel(riskFlags: RiskFlag[]): 'low' | 'medium' | 'high' {
   return 'low';
 }
 
-function toRecommendedListing(result: RecommendationResult): RecommendedListing {
+export function toRecommendedListing(result: RecommendationResult): RecommendedListing {
   const house = result.house;
   const address = house.address || '';
   const parts = address.split(' ');
 
-  const region = house.address_1 || parts[0] || '서울시';
-  const district = house.address_2 || parts[1] || '';
-  const dong = house.address_3 || parts[2] || '';
+  // 주소 파싱 (예: "서울시 마포구 연남동 260-20")
+  const region = parts[0] || '서울시';
+  const district = parts[1] || '';
+  const dong = parts[2] || '';
 
   const contractType = mapSalesType(house.sales_type);
-  const roomType = mapRoomType(house.room_type);
+  const propertyType = mapResidenceType(house.residence_type);
 
   const riskLevel = calculateRiskLevel(result.risk_flags);
   const riskDescription = result.risk_flags
@@ -61,7 +67,7 @@ function toRecommendedListing(result: RecommendationResult): RecommendedListing 
     region,
     district,
     dong,
-    type: roomType,
+    type: propertyType,
     contractType,
     price: house.deposit,
     monthlyRent: house.monthly_rent,
@@ -77,6 +83,10 @@ function toRecommendedListing(result: RecommendationResult): RecommendedListing 
     options: [
       house.can_park ? '주차 가능' : '',
       house.has_elevator ? '엘리베이터' : '',
+      house.room_type ? house.room_type : '',
+      ...(house.built_in ?? []),
+      ...(house.management_included ?? []),
+      ...(house.management_excluded ?? []),
     ].filter(Boolean),
     images: house.image_urls ?? ['https://picsum.photos/seed/default/600/400'],
     description: house.address,
