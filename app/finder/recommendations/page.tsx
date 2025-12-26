@@ -69,7 +69,7 @@ export default function FinderRecommendationsPage() {
 
           // 1️⃣ 추천 요청 (큐에 작업 추가)
           console.log('[DEBUG] 추천 요청 시작, requestId:', requestId);
-          const res = await fetch('/api/search_house', {
+          const res = await fetch('/search_house', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ finder_request_id: Number(requestId) }),
@@ -99,7 +99,7 @@ export default function FinderRecommendationsPage() {
 
           while (isMountedRef.current) {
             console.log('[DEBUG] 폴링 요청 시작, search_house_id:', search_house_id);
-            const pollRes = await fetch(`/api/search_house/${search_house_id}`);
+            const pollRes = await fetch(`/search_house/${search_house_id}`);
             const pollData = await pollRes.json();
 
             console.log('[DEBUG] 폴링 응답:', pollData);
