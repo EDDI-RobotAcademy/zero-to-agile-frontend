@@ -32,6 +32,7 @@ export default function FinderRequestEditPage() {
     priceType: 'JEONSE' as PriceType,
     maxDeposit: 0,
     maxRent: 0,
+    school: '서강대학교',
     additionalCondition: '',
   });
 
@@ -80,6 +81,7 @@ export default function FinderRequestEditPage() {
             priceType: data.priceType || 'JEONSE',
             maxDeposit: data.maxDeposit || 0,
             maxRent: data.maxRent || 0,
+            school: '서강대학교',
             additionalCondition: data.additionalCondition || '',
           });
         }
@@ -381,6 +383,21 @@ export default function FinderRequestEditPage() {
           </div>
 
           <div className="space-y-6 p-6">
+            {/* 학교 */}
+            <label className="block space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-base">🏫</span>
+                <span className="text-sm font-semibold text-slate-700">학교</span>
+              </div>
+              <input
+                type="text"
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm shadow-sm transition focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                value={form.school}
+                onChange={(e) => setForm({ ...form, school: e.target.value })}
+                placeholder="예: 서울대, 연세대"
+              />
+            </label>
+
             {/* 추가 조건 */}
             <label className="block space-y-2">
               <div className="flex items-center gap-2">

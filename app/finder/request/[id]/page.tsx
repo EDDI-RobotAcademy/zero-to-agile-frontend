@@ -147,7 +147,7 @@ export default function FinderRequestDetailPage() {
 
           {/* CTA 버튼 영역 - 핵심 액션 */}
           <button
-            onClick={() => router.push('/finder/recommendations')}
+            onClick={() => router.push(`/finder/recommendations?requestId=${requestId}`)}
             className="group w-full overflow-hidden rounded-3xl bg-gradient-to-r from-blue-500 to-sky-400 px-8 py-5 text-center shadow-xl ring-1 ring-blue-400 transition hover:-translate-y-1 hover:shadow-2xl"
           >
             <div className="flex items-center justify-center gap-3">

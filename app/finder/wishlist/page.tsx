@@ -17,7 +17,7 @@ const ROOM_TYPE_LABEL: Record<string, string> = {
 export default function WishlistPage() {
   const router = useRouter();
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchWishlist = async () => {
@@ -37,9 +37,10 @@ export default function WishlistPage() {
     }
   };
 
-  useEffect(() => {
-    fetchWishlist();
-  }, []);
+  // API 준비 전 임시 주석 처리
+  // useEffect(() => {
+  //   fetchWishlist();
+  // }, []);
 
   const handleRemove = async (wishlistId: number) => {
     if (!confirm('이 매물을 위시리스트에서 삭제하시겠습니까?')) return;
