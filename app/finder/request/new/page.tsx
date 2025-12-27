@@ -232,7 +232,7 @@ export default function FinderRequestNewPage() {
               </label>
             </div>
 
-            {/* 금액 정보 */}
+            {/* 금액 정보 ! */}
             <div className="space-y-4 border-t border-slate-100 pt-6">
               <div className="flex items-center gap-2">
                 <span className="text-base">💰</span>
