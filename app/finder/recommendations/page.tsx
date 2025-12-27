@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/common/Button';
-import { listRecommendations, toRecommendedListing } from '@/lib/repositories/recommendRepository';
+import { listRecommendations, toRecommendedListing, updateRecommendedListingCache } from '@/lib/repositories/recommendRepository';
 import { getFinderRequestById, listFinderRequests } from '@/lib/repositories/finderRepository';
 import { RecommendedListing, RiskLevel, RecommendationResult } from '@/types/recommended';
 import { FinderRequestDetail } from '@/types/finder';
@@ -123,6 +123,7 @@ export default function FinderRecommendationsPage() {
               // API 응답 형식: { status: 'COMPLETED', result: { results: RecommendationResult[] } }
               const results: RecommendationResult[] = pollData.result?.results || [];
               const mappedListings = results.map(toRecommendedListing);
+              updateRecommendedListingCache(mappedListings); // 캐시 업데이트
               setListings(mappedListings);
               setTaskStatus('COMPLETED');
               setLoading(false);
@@ -333,7 +334,7 @@ export default function FinderRecommendationsPage() {
                           보증금
                         </span>
                         <span className="text-2xl font-bold text-blue-900">
-                          {listing.price.toLocaleString()}원
+                          {listing.price.toLocaleString()}만원
                         </span>
                         {(listing.monthlyRent ?? 0) > 0 && (
                           <span className="text-lg text-blue-700">
