@@ -186,7 +186,7 @@ export default function RecommendationDetailPage() {
                 <span className="text-4xl font-extrabold text-slate-900">
                   {listing.price.toLocaleString()}
                 </span>
-                <span className="text-2xl font-bold text-slate-900">원</span>
+                <span className="text-2xl font-bold text-slate-900">만원</span>
               </div>
               {(listing.monthlyRent ?? 0) > 0 && (
                 <div className="flex flex-wrap items-baseline gap-2">
@@ -194,7 +194,7 @@ export default function RecommendationDetailPage() {
                   <span className="text-3xl font-bold text-blue-700">
                     {listing.monthlyRent!.toLocaleString()}
                   </span>
-                  <span className="text-xl font-semibold text-blue-700">원</span>
+                  <span className="text-xl font-semibold text-blue-700">만원</span>
                 </div>
               )}
             </div>

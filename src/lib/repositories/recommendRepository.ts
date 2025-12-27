@@ -158,10 +158,29 @@ export async function listRecommendations(
   }
 }
 
+export function updateRecommendedListingCache(listings: RecommendedListing[]) {
+  recommendedListingStore = listings;
+}
+
 export async function getRecommendationById(id: string): Promise<RecommendedListing | null> {
+  // 1. 캐시에서 찾기
   const cached = recommendedListingStore.find((item) => item.id === id);
   if (cached) return cached;
 
-  // 캐시에 없으면 null 반환
+  // 2. 캐시가 비어있으면 목 데이터 또는 API에서 다시 로드 시도
+  if (recommendedListingStore.length === 0) {
+    if (USE_MOCK) {
+      // 목 데이터 모드: 목 데이터에서 찾기
+      const results = recommendationsMock.results;
+      const list = results.map(toRecommendedListing);
+      recommendedListingStore = list;
+      return list.find((item) => item.id === id) ?? null;
+    }
+    // 실제 API 모드: 캐시가 없으면 null 반환
+    // (상세 페이지 직접 접근 시 리스트 페이지로 리다이렉트 필요)
+    return null;
+  }
+
+  // 3. 캐시에 데이터는 있지만 해당 ID가 없으면 null 반환
   return null;
 }
