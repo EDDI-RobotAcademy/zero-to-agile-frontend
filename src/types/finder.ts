@@ -39,4 +39,27 @@ export interface FinderRequestDetail extends FinderRequestSummary {
   bathroomCount?: number;
 }
 
-export type FinderRequestPayload = Omit<FinderRequestDetail, "finderRequestId" | "status">;
+// export type FinderRequestPayload = {
+//   preferredRegion: string;
+//   priceType: PriceType;
+//   maxDeposit: number;
+//   maxRent: number;
+//   houseType: HouseType;
+//   additionalCondition?: string;
+// };
+
+
+export type FinderRequestCreatePayload = {
+  preferredRegion: string;
+  priceType: PriceType;
+  maxDeposit: number;
+  maxRent: number;
+  houseType: HouseType;
+  additionalCondition?: string;
+};
+
+export type FinderRequestUpdatePayload =
+  Partial<FinderRequestCreatePayload> & {
+    finder_request_id: number;
+    status?: FinderRequestStatus;
+  };

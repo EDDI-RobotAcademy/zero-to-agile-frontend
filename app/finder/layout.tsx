@@ -54,14 +54,14 @@ export default function FinderLayout({ children }: { children: ReactNode }) {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <nav className="flex flex-wrap gap-3 text-sm font-medium">
-            <Link href="/finder" className="rounded px-3 py-2 hover:bg-blue-50">
+            {/* <Link href="/finder" className="rounded px-3 py-2 hover:bg-blue-50">
               홈
-            </Link>
+            </Link> */}
             <Link href="/finder/request" className="rounded px-3 py-2 hover:bg-blue-50">
               내 의뢰서
             </Link>
-            <Link href="/finder/listings" className="rounded px-3 py-2 hover:bg-blue-50">
-              추천 매물
+            <Link href="/finder/wishlist" className="rounded px-3 py-2 hover:bg-blue-50">
+              위시리스트
             </Link>
             <Link href="/finder/contacts" className="rounded px-3 py-2 hover:bg-blue-50">
               임대인 컨택

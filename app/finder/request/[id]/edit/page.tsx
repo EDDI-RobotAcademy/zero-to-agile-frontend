@@ -1,27 +1,33 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/common/Button';
 import { useRole } from '@/lib/auth/roleContext';
 import {
-  createFinderRequest,
+  getFinderRequestById,
+  updateFinderRequest,
 } from '@/lib/repositories/finderRepository';
-import { HouseType, PriceType } from '@/types/finder';
+import { HouseType, PriceType, FinderRequestStatus } from '@/types/finder';
 import {
   HOUSE_TYPE_LABEL,
   PRICE_TYPE_LABEL,
+  STATUS_LABEL,
 } from '@/types/finder.constants';
 import { DISTRICTS, DISTRICT_TO_DONG } from '@/lib/constants/districts';
 
-export default function FinderRequestNewPage() {
+export default function FinderRequestEditPage() {
   const router = useRouter();
+  const params = useParams();
   const { isReady, isAuthenticated } = useRole();
+
+  const requestId = Number(params.id);
 
   const [district, setDistrict] = useState<string>('');
   const [dong, setDong] = useState<string>('');
 
   const [form, setForm] = useState({
+    status: 'Y' as FinderRequestStatus,
     houseType: 'APARTMENT' as HouseType,
     priceType: 'JEONSE' as PriceType,
     maxDeposit: 0,
@@ -31,6 +37,7 @@ export default function FinderRequestNewPage() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const dongs = DISTRICT_TO_DONG[district] ?? [];
@@ -41,7 +48,50 @@ export default function FinderRequestNewPage() {
       router.replace("/auth/role-select");
       return;
     }
-  }, [isReady, isAuthenticated, router]);
+
+    if (isNaN(requestId)) {
+      setError("잘못된 의뢰서 ID입니다.");
+      setDataLoading(false);
+      return;
+    }
+
+    // 기존 의뢰서 데이터 불러오기
+    (async () => {
+      try {
+        setDataLoading(true);
+        setError(null);
+
+        const data = await getFinderRequestById(requestId);
+        if (!data) {
+          setError("의뢰서를 찾을 수 없습니다.");
+        } else {
+          // preferredRegion을 파싱하여 구/동 분리
+          const region = data.preferredRegion || '';
+          const parts = region.trim().split(' ');
+          const parsedDistrict = parts[0] || '';
+          const parsedDong = parts[1] || '';
+
+          setDistrict(parsedDistrict);
+          setDong(parsedDong);
+
+          // 불러온 데이터로 폼 초기화
+          setForm({
+            status: data.status || 'Y',
+            houseType: data.houseType || 'APARTMENT',
+            priceType: data.priceType || 'JEONSE',
+            maxDeposit: data.maxDeposit || 0,
+            maxRent: data.maxRent || 0,
+            school: '서강대학교',
+            additionalCondition: data.additionalCondition || '',
+          });
+        }
+      } catch (err: any) {
+        setError(err?.message ?? "의뢰서를 불러오지 못했습니다.");
+      } finally {
+        setDataLoading(false);
+      }
+    })();
+  }, [isReady, isAuthenticated, requestId, router]);
 
   const handleDistrictChange = (value: string) => {
     setDistrict(value);
@@ -67,34 +117,47 @@ export default function FinderRequestNewPage() {
 
     try {
       setLoading(true);
-      await createFinderRequest({
+      await updateFinderRequest(requestId, {
+        finder_request_id: requestId,
+        status: form.status,
         preferredRegion,
+        houseType: form.houseType,
         priceType: form.priceType,
         maxDeposit: form.maxDeposit,
         maxRent: form.maxRent,
-        houseType: form.houseType,
-        additionalCondition: form.additionalCondition,
+        additionalCondition: form.additionalCondition || undefined,
       });
-      alert('의뢰서가 성공적으로 등록되었습니다.');
-      router.push('/finder/request');
+
+      alert('의뢰서가 성공적으로 수정되었습니다.');
+      router.push(`/finder/request/${requestId}`);
     } catch (err: any) {
-      setError(err?.message ?? '의뢰서 등록에 실패했습니다.');
+      setError(err?.message ?? '의뢰서 수정에 실패했습니다.');
     } finally {
       setLoading(false);
     }
   };
+
+  if (dataLoading) {
+    return (
+      <main className="space-y-6">
+        <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 via-white to-blue-50 p-8 shadow-sm ring-1 ring-slate-100">
+          <p className="text-sm text-slate-600">의뢰서를 불러오는 중...</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="space-y-6">
       {/* 헤더 */}
       <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 via-white to-blue-50 p-8 shadow-sm ring-1 ring-slate-100">
         <div className="space-y-1">
-          <p className="text-sm font-semibold text-sky-700">의뢰서 작성</p>
+          <p className="text-sm font-semibold text-sky-700">의뢰서 수정</p>
           <h2 className="text-3xl font-bold text-slate-900">
-            새 매물 의뢰서
+            의뢰서 #{requestId} 수정
           </h2>
           <p className="text-sm text-slate-600">
-            원하시는 매물 조건을 입력하면 AI가 추천해드려요.
+            수정하고 싶은 매물 조건을 입력하세요.
           </p>
         </div>
       </div>
@@ -118,6 +181,36 @@ export default function FinderRequestNewPage() {
           </div>
 
           <div className="space-y-6 p-6">
+            {/* 활성화/비활성화 토글 */}
+            <div className="block space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-base">⚡</span>
+                <span className="text-sm font-semibold text-slate-700">
+                  의뢰서 상태
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, status: form.status === 'Y' ? 'N' : 'Y' })}
+                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${
+                    form.status === 'Y' ? 'bg-blue-600' : 'bg-slate-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-6 w-6 transform rounded-full bg-white transition-transform ${
+                      form.status === 'Y' ? 'translate-x-7' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+                <span className={`text-sm font-semibold ${
+                  form.status === 'Y' ? 'text-blue-600' : 'text-slate-500'
+                }`}>
+                  {STATUS_LABEL[form.status]}
+                </span>
+              </div>
+            </div>
+
             {/* 희망 지역 - 구/동 선택 */}
             <div className="block space-y-2">
               <div className="flex items-center gap-2">
@@ -232,7 +325,7 @@ export default function FinderRequestNewPage() {
               </label>
             </div>
 
-            {/* 금액 정보 ! */}
+            {/* 금액 정보 */}
             <div className="space-y-4 border-t border-slate-100 pt-6">
               <div className="flex items-center gap-2">
                 <span className="text-base">💰</span>
@@ -335,7 +428,7 @@ export default function FinderRequestNewPage() {
           <Button
             type="button"
             variant="secondary"
-            onClick={() => router.push('/finder/request')}
+            onClick={() => router.push(`/finder/request/${requestId}`)}
             className="rounded-xl px-6 py-3 text-base"
           >
             취소
@@ -345,7 +438,7 @@ export default function FinderRequestNewPage() {
             disabled={loading}
             className="rounded-xl px-8 py-3 text-base"
           >
-            {loading ? '등록 중...' : '의뢰서 등록'}
+            {loading ? '수정 중...' : '의뢰서 수정'}
           </Button>
         </div>
       </form>
