@@ -35,6 +35,15 @@ export default function FinderHomePage() {
       router.replace('/auth/role-select');
       return;
     }
+    // 임차인 홈을 /finder/request로 리다이렉트
+    router.replace('/finder/request');
+  }, [isReady, isAuthenticated, router]);
+
+  useEffect(() => {
+    if (!isReady) return;
+    if (!isAuthenticated) {
+      return;
+    }
     (async () => {
       try {
         setError(null);

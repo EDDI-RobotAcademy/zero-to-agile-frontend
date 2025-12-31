@@ -8,8 +8,9 @@ export const HOUSE_TYPE_LABEL = {
 
 export const PRICE_TYPE_LABEL = {
   JEONSE: "전세",
-  SALE: "매매",
   MONTHLY: "월세",
+  MIXED: "반전세",
+  ETC: "기타",
 } as const;
 
 export const STATUS_LABEL = {
