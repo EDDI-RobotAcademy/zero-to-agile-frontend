@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/common/Button';
+import { SchoolSearchInput } from '@/components/common/SchoolSearchInput';
 import { useRole } from '@/lib/auth/roleContext';
 import {
   createFinderRequest,
@@ -26,12 +27,21 @@ export default function FinderRequestNewPage() {
     priceType: 'JEONSE' as PriceType,
     maxDeposit: 0,
     maxRent: 0,
-    school: '서강대학교',
+    school: '',
     additionalCondition: '',
+    phoneNumber: '',
+    isNear: 'n',
+    airconYn: 'n',
+    washerYn: 'n',
+    fridgeYn: 'n',
+    useaprYear: 0,
   });
 
+  // 가라 데이터: 전화번호가 있는 경우 테스트하려면 '010-1234-5678' 입력, 없는 경우는 undefined
+  const [userPhone, setUserPhone] = useState<string | undefined>('010-1234-5678');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
 
   const dongs = DISTRICT_TO_DONG[district] ?? [];
 
@@ -41,7 +51,12 @@ export default function FinderRequestNewPage() {
       router.replace("/auth/role-select");
       return;
     }
-  }, [isReady, isAuthenticated, router]);
+
+    // 가라 데이터가 있으면 form에 설정
+    if (userPhone) {
+      setForm(prev => ({ ...prev, phoneNumber: userPhone }));
+    }
+  }, [isReady, isAuthenticated, router, userPhone]);
 
   const handleDistrictChange = (value: string) => {
     setDistrict(value);
@@ -51,6 +66,7 @@ export default function FinderRequestNewPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
+    setPhoneError(null);
 
     if (!district.trim()) {
       setError('희망 지역(구)을 선택해주세요.');
@@ -59,6 +75,22 @@ export default function FinderRequestNewPage() {
 
     if (form.maxDeposit <= 0) {
       setError('보증금을 입력해주세요.');
+      return;
+    }
+
+    // 전화번호 필수 검증
+    if (!form.phoneNumber || form.phoneNumber.trim() === '') {
+      setPhoneError('전화번호는 필수로 작성해야 합니다.');
+      // 스크롤을 전화번호 필드로 이동
+      const phoneInput = document.getElementById('phone-number-input');
+      phoneInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      phoneInput?.focus();
+      return;
+    }
+
+    // 노후도 필수 검증
+    if (form.useaprYear === 0) {
+      setError('건물 노후도를 선택해주세요.');
       return;
     }
 
@@ -74,6 +106,12 @@ export default function FinderRequestNewPage() {
         maxRent: form.maxRent,
         houseType: form.houseType,
         additionalCondition: form.additionalCondition,
+        phoneNumber: form.phoneNumber,
+        isNear: form.isNear,
+        airconYn: form.airconYn,
+        washerYn: form.washerYn,
+        fridgeYn: form.fridgeYn,
+        useaprYear: form.useaprYear,
       });
       alert('의뢰서가 성공적으로 등록되었습니다.');
       router.push('/finder/request');
@@ -298,35 +336,174 @@ export default function FinderRequestNewPage() {
           </div>
 
           <div className="space-y-6 p-6">
-            {/* 학교 */}
-            <label className="block space-y-2">
+            {/* 전화번호 */}
+            <div className="space-y-4">
+              <label className="block space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">📞</span>
+                  <span className="text-sm font-semibold text-slate-700">전화번호</span>
+                  <span className="text-xs text-red-500">*</span>
+                </div>
+                <input
+                  id="phone-number-input"
+                  type="tel"
+                  className={`w-full rounded-xl border px-4 py-3 text-sm shadow-sm transition focus:outline-none focus:ring-2 ${
+                    phoneError
+                      ? 'border-red-300 bg-red-50 focus:border-red-400 focus:ring-red-100'
+                      : userPhone
+                      ? 'border-slate-200 bg-slate-50 text-slate-500 cursor-not-allowed'
+                      : 'border-slate-200 focus:border-blue-400 focus:ring-blue-100'
+                  }`}
+                  value={form.phoneNumber}
+                  onChange={(e) => {
+                    if (!userPhone) {
+                      setForm({ ...form, phoneNumber: e.target.value });
+                      if (phoneError) setPhoneError(null);
+                    }
+                  }}
+                  placeholder="예: 010-1234-5678"
+                  disabled={!!userPhone}
+                  readOnly={!!userPhone}
+                />
+                {phoneError && (
+                  <p className="text-xs text-red-600 font-semibold flex items-center gap-1">
+                    <span>⚠️</span>
+                    {phoneError}
+                  </p>
+                )}
+                {userPhone && (
+                  <p className="text-xs text-slate-500">
+                    등록된 전화번호는 수정할 수 없습니다.
+                  </p>
+                )}
+              </label>
+            </div>
+
+            {/* 학교 정보 - 구분선 */}
+            <div className="space-y-4 border-t border-slate-100 pt-6">
               <div className="flex items-center gap-2">
                 <span className="text-base">🏫</span>
-                <span className="text-sm font-semibold text-slate-700">학교</span>
+                <span className="text-sm font-semibold text-slate-700">학교 정보</span>
               </div>
-              <input
-                type="text"
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm shadow-sm transition focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                value={form.school}
-                onChange={(e) => setForm({ ...form, school: e.target.value })}
-                placeholder="예: 서울대, 연세대"
-              />
-            </label>
 
-            {/* 추가 조건 */}
-            <label className="block space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="text-base">💬</span>
-                <span className="text-sm font-semibold text-slate-700">추가 조건</span>
+              <div className="space-y-2">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  학교명
+                </span>
+                <SchoolSearchInput
+                  value={form.school}
+                  onChange={(value) => setForm({ ...form, school: value })}
+                  placeholder="학교명을 검색하세요 (예: 에방대학교 )"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm shadow-sm transition focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                />
               </div>
-              <textarea
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm shadow-sm transition focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                value={form.additionalCondition}
-                onChange={(e) => setForm({ ...form, additionalCondition: e.target.value })}
-                placeholder="원하시는 추가 조건을 자유롭게 작성해주세요. (예: 햇빛이 잘 들었으면 좋겠어요)"
-                rows={4}
-              />
-            </label>
+
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    className="h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer transition"
+                    checked={form.isNear === 'y'}
+                    onChange={(e) => setForm({ ...form, isNear: e.target.checked ? 'y' : 'n' })}
+                  />
+                  <span className="text-sm text-slate-700 group-hover:text-slate-900 transition">
+                    학교가 가까웠으면 좋겠어요
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            {/* 가전제품 옵션 - 구분선 */}
+            <div className="space-y-4 border-t border-slate-100 pt-6">
+              <div className="flex items-center gap-2">
+                <span className="text-base">⚡</span>
+                <span className="text-sm font-semibold text-slate-700">가전제품 옵션</span>
+              </div>
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      className="h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer transition"
+                      checked={form.airconYn === 'y'}
+                      onChange={(e) => setForm({ ...form, airconYn: e.target.checked ? 'y' : 'n' })}
+                    />
+                    <span className="text-sm text-slate-700 group-hover:text-slate-900 transition">
+                      에어컨
+                    </span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      className="h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer transition"
+                      checked={form.washerYn === 'y'}
+                      onChange={(e) => setForm({ ...form, washerYn: e.target.checked ? 'y' : 'n' })}
+                    />
+                    <span className="text-sm text-slate-700 group-hover:text-slate-900 transition">
+                      세탁기
+                    </span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      className="h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer transition"
+                      checked={form.fridgeYn === 'y'}
+                      onChange={(e) => setForm({ ...form, fridgeYn: e.target.checked ? 'y' : 'n' })}
+                    />
+                    <span className="text-sm text-slate-700 group-hover:text-slate-900 transition">
+                      냉장고
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            {/* 건물 노후도 - 구분선 */}
+            <div className="space-y-4 border-t border-slate-100 pt-6">
+              <label className="block space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">🏗️</span>
+                  <span className="text-sm font-semibold text-slate-700">건물 노후도</span>
+                  <span className="text-xs text-red-500">*</span>
+                </div>
+                <select
+                  className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm shadow-sm transition focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  style={{
+                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                    backgroundPosition: 'right 0.75rem center',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: '1.5em 1.5em',
+                  }}
+                  value={form.useaprYear}
+                  onChange={(e) => setForm({ ...form, useaprYear: Number(e.target.value) })}
+                  required
+                >
+                  <option value="0">선택해주세요</option>
+                  <option value="1">5년 이하</option>
+                  <option value="2">5~9년</option>
+                  <option value="3">10~19년</option>
+                  <option value="4">20~29년</option>
+                  <option value="5">30년 이상</option>
+                </select>
+              </label>
+            </div>
+
+            {/* 추가 조건 - 구분선 */}
+            <div className="space-y-4 border-t border-slate-100 pt-6">
+              <label className="block space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">💬</span>
+                  <span className="text-sm font-semibold text-slate-700">추가 조건</span>
+                </div>
+                <textarea
+                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm shadow-sm transition focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  value={form.additionalCondition}
+                  onChange={(e) => setForm({ ...form, additionalCondition: e.target.value })}
+                  placeholder="원하시는 추가 조건을 자유롭게 작성해주세요. (예: 햇빛이 잘 들었으면 좋겠어요)"
+                  rows={4}
+                />
+              </label>
+            </div>
           </div>
         </div>
 

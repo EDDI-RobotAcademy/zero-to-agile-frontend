@@ -37,6 +37,12 @@ export interface FinderRequestDetail extends FinderRequestSummary {
   additionalCondition?: string;
   roomCount?: number;
   bathroomCount?: number;
+  phoneNumber?: string;
+  isNear?: string;
+  airconYn?: string;
+  washerYn?: string;
+  fridgeYn?: string;
+  useaprYear?: number;
 }
 
 // export type FinderRequestPayload = {
@@ -56,6 +62,12 @@ export type FinderRequestCreatePayload = {
   maxRent: number;
   houseType: HouseType;
   additionalCondition?: string;
+  phoneNumber?: string;
+  isNear?: string; // 학교 근처 여부 (y/n)
+  airconYn?: string; // 에어컨 여부 (y/n)
+  washerYn?: string; // 세탁기 여부 (y/n)
+  fridgeYn?: string; // 냉장고 여부 (y/n)
+  useaprYear?: number; // 노후도 (1: 5년 이하, 2: 5~9년, 3: 10~19년, 4: 20~29년, 5: 30년 이상)
 };
 
 export type FinderRequestUpdatePayload =
