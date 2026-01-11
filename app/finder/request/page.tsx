@@ -5,21 +5,21 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/common/Button';
 import { Card } from '@/components/common/Card';
 import { useRole } from '@/lib/auth/roleContext';
+
 import {
-  listFinderRequests,
+  getFinderRequests,
 } from '@/lib/repositories/finderRepository';
-import { FinderRequestSummary } from '@/types/finder';
-import {
-  HOUSE_TYPE_LABEL,
-  PRICE_TYPE_LABEL,
-  STATUS_LABEL
-} from '@/types/finder.constants';
+
+
+import { FinderRequest } from '@/types/finder';
+
+import { STATUS_LABEL } from "@/types/houseOptions";
 
 
 export default function FinderRequestPage() {
   const router = useRouter();
   const { isReady, isAuthenticated } = useRole();
-  const [requests, setRequests] = useState<FinderRequestSummary[]>([]);
+  const [requests, setRequests] = useState<FinderRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,7 +35,7 @@ export default function FinderRequestPage() {
         setLoading(true);
         setError(null);
 
-        const data = await listFinderRequests();
+        const data = await getFinderRequests();
         setRequests(data);
 
       } catch (err: any) {
@@ -119,8 +119,6 @@ export default function FinderRequestPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {requests.map((request) => {
             const statusLabel = STATUS_LABEL[request.status];
-            const houseTypeLabel = HOUSE_TYPE_LABEL[request.houseType];
-            const priceTypeLabel = PRICE_TYPE_LABEL[request.priceType];
 
             return (
               <button
@@ -168,7 +166,7 @@ export default function FinderRequestPage() {
                     {/* 부동산 유형 + 임대 유형 */}
                     <div className="flex items-center gap-2 text-sm text-slate-700">
                       <span className="text-base">🏠</span>
-                      {houseTypeLabel} · {priceTypeLabel}
+                      {request.houseType} · {request.priceType}
                     </div>
 
                     {/* 금액 강조 */}
@@ -179,17 +177,17 @@ export default function FinderRequestPage() {
                         <p className="text-lg font-bold text-slate-900">
                           {Number(request.maxDeposit ?? 0).toLocaleString()}
                           <span className="ml-1 text-sm font-normal text-slate-500">
-                            원
+                            만원
                           </span>
                         </p>
                       </div>
-                      {request.priceType === "MONTHLY" && (
+                      {request.priceType === "월세" && (
                         <div className="ml-auto">
                           <p className="text-xs text-slate-500">월세</p>
                           <p className="text-lg font-bold text-blue-600">
                             {Number(request.maxRent ?? 0).toLocaleString()}
                             <span className="ml-1 text-sm font-normal text-slate-500">
-                              원
+                              만원
                             </span>
                           </p>
                         </div>

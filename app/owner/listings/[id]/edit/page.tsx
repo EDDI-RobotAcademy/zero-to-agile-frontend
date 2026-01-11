@@ -1,22 +1,23 @@
 "use client";
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/common/Button';
+import { getHousePlatformById, updateHousePlatform } from '@/lib/repositories/ownerRepository';
 import { AddressAutocompleteInput } from '@/components/common/AddressAutocompleteInput';
-import { createHousePlatform } from '@/lib/repositories/ownerRepository';
-import { SALES_TYPES, RESIDENCE_TYPES, ROOM_TYPES, HousePlatformFormState } from '@/types/owner';
+import { SALES_TYPES, RESIDENCE_TYPES, ROOM_TYPES, HousePlatformEditFormState } from '@/types/owner';
 
-export default function OwnerNewListingPage() {
+type PageProps = { params: Promise<{ id: string }> };
+
+export default function OwnerEditListingPage({ params }: PageProps) {
   const router = useRouter();
 
+  const [housePlatformId, setHousePlatformId] = useState<number | null>(null);
   const [baseAddress, setBaseAddress] = useState<string>('');
   const [detailAddress, setDetailAddress] = useState<string>('');
 
-  const [form, setForm] = useState<HousePlatformFormState>({
+  const [form, setForm] = useState<HousePlatformEditFormState>({
     title: '',
-    domainId: 1,
-    rgstNo: '',
     salesType: '월세',
     deposit: 0,
     monthlyRent: 0,
@@ -29,13 +30,12 @@ export default function OwnerNewListingPage() {
     manageCost: 0,
     canPark: false,
     hasElevator: false,
-    pnuCd: '',
-    snapshotId: '',
   });
 
   const [imageUrls, setImageUrls] = useState<string[]>(['']);
 
   const [loading, setLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const handleAddImageUrl = () => {
@@ -54,39 +54,76 @@ export default function OwnerNewListingPage() {
     setImageUrls(newImageUrls);
   };
 
+  useEffect(() => {
+    let active = true;
+    Promise.resolve(params).then(async ({ id }) => {
+      if (!active) return;
+      const numId = Number(id);
+      setHousePlatformId(numId);
+
+      try {
+        setDataLoading(true);
+        const data = await getHousePlatformById(numId);
+        if (!active) return;
+        if (!data) {
+          setError('매물을 찾을 수 없습니다.');
+          return;
+        }
+
+        // 주소 파싱
+        const addressParts = data.address.trim().split(' ');
+        // baseAddress는 구와 동으로 구성
+        const guPart = data.guNm || addressParts[0] || '';
+        const dongPart = data.dongNm || (addressParts.length > 1 ? addressParts[1] : '');
+        setBaseAddress(dongPart ? `${guPart} ${dongPart}` : guPart);
+
+        // detailAddress는 나머지 부분
+        const startIndex = (data.guNm && data.dongNm) ? 2 : 1;
+        setDetailAddress(addressParts.slice(startIndex).join(' '));
+
+        // 폼 초기화
+        setForm({
+          title: data.title,
+          salesType: data.salesType,
+          deposit: data.deposit,
+          monthlyRent: data.monthlyRent,
+          residenceType: data.residenceType,
+          roomType: data.roomType,
+          contractArea: data.contractArea,
+          exclusiveArea: data.exclusiveArea,
+          floorNo: data.floorNo,
+          allFloors: data.allFloors,
+          manageCost: data.manageCost,
+          canPark: data.canPark,
+          hasElevator: data.hasElevator,
+        });
+
+        // 이미지 URL 파싱
+        try {
+          const parsedUrls = data.imageUrls ? JSON.parse(data.imageUrls) : [];
+          setImageUrls(Array.isArray(parsedUrls) && parsedUrls.length > 0 ? parsedUrls : ['']);
+        } catch {
+          setImageUrls(data.imageUrls ? [data.imageUrls] : ['']);
+        }
+      } catch (err: any) {
+        if (active) setError(err?.message ?? '매물을 불러오지 못했습니다.');
+      } finally {
+        if (active) setDataLoading(false);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [params]);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!housePlatformId) return;
     setError(null);
 
-    if (!form.title.trim()) {
-      setError('매물 제목을 입력해주세요.');
-      return;
-    }
-
-    if (!baseAddress.trim()) {
-      setError('지역을 입력해주세요.');
-      return;
-    }
-
-    if (!detailAddress.trim()) {
-      setError('상세 주소를 입력해주세요.');
-      return;
-    }
-
-    if (form.deposit <= 0) {
-      setError('보증금을 입력해주세요.');
-      return;
-    }
-
-    if (form.exclusiveArea <= 0) {
-      setError('전용면적을 입력해주세요.');
-      return;
-    }
-
-    // 주소 조합
     const fullAddress = `${baseAddress.trim()} ${detailAddress.trim()}`;
 
-    // 구/동 추출 (마지막 두 단어)
+    // baseAddress에서 구/동 추출
     const addressParts = baseAddress.trim().split(' ');
     const guNm = addressParts.length >= 2 ? addressParts[addressParts.length - 2] : '';
     const dongNm = addressParts.length >= 1 ? addressParts[addressParts.length - 1] : '';
@@ -96,51 +133,68 @@ export default function OwnerNewListingPage() {
       // 빈 URL 제거
       const filteredImageUrls = imageUrls.filter(url => url.trim() !== '');
 
-      await createHousePlatform({
+      await updateHousePlatform(housePlatformId, {
         title: form.title,
         address: fullAddress,
         deposit: form.deposit,
-        domainId: form.domainId,
-        rgstNo: form.rgstNo || `REG-${Date.now()}`,
         salesType: form.salesType,
         monthlyRent: form.monthlyRent,
         roomType: form.roomType,
-        contractArea: form.contractArea || form.exclusiveArea,
+        contractArea: form.contractArea,
         exclusiveArea: form.exclusiveArea,
         floorNo: form.floorNo,
         allFloors: form.allFloors,
-        latLng: {},
         manageCost: form.manageCost,
         canPark: form.canPark,
         hasElevator: form.hasElevator,
         imageUrls: JSON.stringify(filteredImageUrls),
-        pnuCd: form.pnuCd || '',
-        isBanned: false,
         residenceType: form.residenceType,
-        guNm: guNm,
-        dongNm: dongNm,
-        snapshotId: form.snapshotId || `SNAP-${Date.now()}`,
+        guNm,
+        dongNm,
       });
-      alert('매물이 성공적으로 등록되었습니다.');
+      alert('매물이 수정되었습니다.');
       router.push('/owner/listings');
     } catch (err: any) {
-      setError(err?.message ?? '매물 등록에 실패했습니다.');
+      setError(err?.message ?? '매물 수정에 실패했습니다.');
     } finally {
       setLoading(false);
     }
   };
+
+  if (dataLoading) {
+    return (
+      <main className="space-y-6">
+        <div className="rounded-2xl border border-slate-100 bg-white p-8 text-center">
+          <p className="text-sm text-slate-600">매물을 불러오는 중...</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (error && !form.title) {
+    return (
+      <main className="space-y-6">
+        <div className="rounded-2xl border border-red-100 bg-red-50 p-8 text-center">
+          <p className="text-sm text-red-600">{error}</p>
+          <Button onClick={() => router.push('/owner/listings')} className="mt-4">
+            목록으로
+          </Button>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="space-y-6">
       {/* 헤더 */}
       <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 via-white to-green-50 p-8 shadow-sm ring-1 ring-slate-100">
         <div className="space-y-1">
-          <p className="text-sm font-semibold text-emerald-700">매물 등록</p>
+          <p className="text-sm font-semibold text-emerald-700">매물 수정</p>
           <h2 className="text-3xl font-bold text-slate-900">
-            새 매물 등록
+            매물 정보 수정
           </h2>
           <p className="text-sm text-slate-600">
-            보유하신 매물 정보를 입력하여 등록하세요.
+            등록된 매물 정보를 수정하세요.
           </p>
         </div>
       </div>
@@ -152,13 +206,12 @@ export default function OwnerNewListingPage() {
         </div>
       )}
 
-      {/* 폼 */}
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* 기본 정보 */}
         <div className="overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-slate-200">
           <div className="border-b border-slate-100 bg-gradient-to-r from-emerald-50 to-green-50 px-6 py-4">
             <h3 className="text-lg font-bold text-slate-900">기본 정보</h3>
-            <p className="mt-1 text-xs text-slate-600">매물의 기본 정보를 입력하세요</p>
+            <p className="mt-1 text-xs text-slate-600">매물의 기본 정보를 수정하세요</p>
           </div>
           <div className="space-y-6 p-6">
             <div>
@@ -210,11 +263,8 @@ export default function OwnerNewListingPage() {
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
                   value={form.residenceType}
                   onChange={(e) => setForm({ ...form, residenceType: e.target.value })}
-                  required
                 >
-                  {RESIDENCE_TYPES.map((type) => (
-                    <option key={type.value} value={type.value}>{type.label}</option>
-                  ))}
+                  {RESIDENCE_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
               </div>
 
@@ -226,11 +276,8 @@ export default function OwnerNewListingPage() {
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
                   value={form.salesType}
                   onChange={(e) => setForm({ ...form, salesType: e.target.value })}
-                  required
                 >
-                  {SALES_TYPES.map((type) => (
-                    <option key={type.value} value={type.value}>{type.label}</option>
-                  ))}
+                  {SALES_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
               </div>
             </div>
@@ -387,9 +434,7 @@ export default function OwnerNewListingPage() {
                 value={form.roomType}
                 onChange={(e) => setForm({ ...form, roomType: e.target.value })}
               >
-                {ROOM_TYPES.map((type) => (
-                  <option key={type.value} value={type.value}>{type.label}</option>
-                ))}
+                {ROOM_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
             </div>
 
@@ -472,16 +517,11 @@ export default function OwnerNewListingPage() {
         </div>
 
         <div className="flex justify-end gap-3">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => router.push('/owner/listings')}
-            disabled={loading}
-          >
+          <Button type="button" variant="secondary" onClick={() => router.push('/owner/listings')} disabled={loading}>
             취소
           </Button>
           <Button type="submit" disabled={loading}>
-            {loading ? '등록 중...' : '매물 등록'}
+            {loading ? '수정 중...' : '변경사항 저장'}
           </Button>
         </div>
       </form>

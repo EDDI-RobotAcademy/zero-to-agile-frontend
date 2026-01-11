@@ -1,65 +1,67 @@
-import {
-  HOUSE_TYPE_LABEL,
-  PRICE_TYPE_LABEL,
-  STATUS_LABEL,
-} from "./finder.constants";
-
-export type HouseType = keyof typeof HOUSE_TYPE_LABEL;
-export type PriceType = keyof typeof PRICE_TYPE_LABEL;
-export type FinderRequestStatus = keyof typeof STATUS_LABEL;
-
-export interface FinderProfile {
-  id: string;
-  nickname: string;
-  phone?: string;
-}
-
-export interface FinderRequestSummary {
-  id: number;
+import { PriceType, FinderRequestStatus, HouseType } from "@/types/houseOptions";
+/**
+ * FinderRequest - 임차인 요구서
+ */
+export interface FinderRequest {
   finderRequestId: number;
+  abangUserId: number;
   preferredRegion: string;
   priceType: PriceType;
   maxDeposit: number;
   maxRent: number;
-  houseType: HouseType;
   status: FinderRequestStatus;
+  houseType: string;
+  additionalCondition: string;
+  universityName: string;
+  roomcount: string;
+  bathroomcount: string;
+  isNear: boolean;
+  airconYn: string;
+  washerYn: string;
+  fridgeYn: string;
+  maxBuildingAge: number;
+  phoneNumber?: string; // 컨텍 수락 시에만 제공
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface FinderRequestDetail extends FinderRequestSummary {
-  finderId: string | undefined;
-  area?: number;
-  budget?: number;
-  dealType?: string;
-  residenceType?: string;
-  preferredArea?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  additionalCondition?: string;
-  roomCount?: number;
-  bathroomCount?: number;
-}
-
-// export type FinderRequestPayload = {
-//   preferredRegion: string;
-//   priceType: PriceType;
-//   maxDeposit: number;
-//   maxRent: number;
-//   houseType: HouseType;
-//   additionalCondition?: string;
-// };
-
-
-export type FinderRequestCreatePayload = {
+/**
+ * 요구서 생성 Payload
+ */
+export interface FinderRequestCreatePayload {
   preferredRegion: string;
   priceType: PriceType;
   maxDeposit: number;
   maxRent: number;
-  houseType: HouseType;
-  additionalCondition?: string;
-};
+  houseType: string;
+  additionalCondition: string;
+  universityName: string;
+  roomcount: string;
+  bathroomcount: string;
+  isNear: boolean;
+  airconYn: string;
+  washerYn: string;
+  fridgeYn: string;
+  maxBuildingAge: number;
+}
 
-export type FinderRequestUpdatePayload =
-  Partial<FinderRequestCreatePayload> & {
-    finder_request_id: number;
-    status?: FinderRequestStatus;
-  };
+/**
+ * 요구서 수정 Payload
+ */
+export interface FinderRequestUpdatePayload {
+  preferredRegion?: string;
+  priceType?: PriceType;
+  maxDeposit?: number;
+  maxRent?: number;
+  houseType?: string;
+  additionalCondition?: string;
+  universityName?: string;
+  roomcount?: string;
+  bathroomcount?: string;
+  isNear?: boolean;
+  airconYn?: string;
+  washerYn?: string;
+  fridgeYn?: string;
+  maxBuildingAge?: number;
+  status?: FinderRequestStatus;
+}

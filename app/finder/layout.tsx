@@ -64,7 +64,7 @@ export default function FinderLayout({ children }: { children: ReactNode }) {
               위시리스트
             </Link>
             <Link href="/finder/contacts" className="rounded px-3 py-2 hover:bg-blue-50">
-              임대인 컨택
+              컨택 요청
             </Link>
           </nav>
           <button

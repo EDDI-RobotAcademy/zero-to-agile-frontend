@@ -9,19 +9,17 @@ import {
   getFinderRequestById,
   deleteFinderRequest,
 } from '@/lib/repositories/finderRepository';
-import { FinderRequestDetail } from '@/types/finder';
+import { FinderRequest } from '@/types/finder';
 import {
-  HOUSE_TYPE_LABEL,
-  PRICE_TYPE_LABEL,
   STATUS_LABEL,
-} from '@/types/finder.constants';
+} from '@/types/houseOptions';
 import { formatDate } from '@/lib/utils/dateUtils';
 
 export default function FinderRequestDetailPage() {
   const router = useRouter();
   const params = useParams();
   const { isReady, isAuthenticated } = useRole();
-  const [request, setRequest] = useState<FinderRequestDetail | null>(null);
+  const [request, setRequest] = useState<FinderRequest | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -174,10 +172,10 @@ export default function FinderRequestDetailPage() {
 
               {/* 지역 + 부동산유형 / 임대유형 */}
               <div className="mb-6 border-b border-slate-100 pb-6 text-xl font-bold text-slate-900">
-                {request.preferredRegion} {HOUSE_TYPE_LABEL[request.houseType]}{' '}
+                {request.preferredRegion} {request.houseType}{' '}
                 <span className="text-slate-400">/</span>{' '}
                 <span className="text-blue-600">
-                  {PRICE_TYPE_LABEL[request.priceType]}
+                  {request.priceType}
                 </span>
               </div>
 
@@ -190,12 +188,12 @@ export default function FinderRequestDetailPage() {
                   <p className="text-2xl font-extrabold text-slate-900">
                     {Number(request.maxDeposit ?? 0).toLocaleString()}
                     <span className="ml-1 text-base font-normal text-slate-500">
-                      원
+                      만원
                     </span>
                   </p>
                 </div>
 
-                {request.priceType === "MONTHLY" && (
+                {request.priceType === "월세" && (
                   <div>
                     <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
                       월세
@@ -203,7 +201,7 @@ export default function FinderRequestDetailPage() {
                     <p className="text-2xl font-extrabold text-blue-600">
                       {Number(request.maxRent ?? 0).toLocaleString()}
                       <span className="ml-1 text-base font-normal text-slate-500">
-                        원
+                        만원
                       </span>
                     </p>
                   </div>
@@ -212,7 +210,7 @@ export default function FinderRequestDetailPage() {
             </div>
 
             {/* 섹션 B: 상세 정보 */}
-            {(request.roomCount || request.bathroomCount || request.additionalCondition) && (
+            {(request.universityName || request.roomcount || request.bathroomcount || request.maxBuildingAge || request.additionalCondition) && (
               <div className="p-8">
                 <div className="mb-4 flex items-center gap-2">
                   <span className="text-lg">📌</span>
@@ -221,10 +219,80 @@ export default function FinderRequestDetailPage() {
                   </h3>
                 </div>
 
+                <div className="space-y-4">
+                  {/* 학교 정보 */}
+                  {request.universityName && (
+                    <div>
+                      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        대학교
+                      </p>
+                      <p className="text-sm text-slate-700">
+                        {request.universityName}
+                        {request.isNear && <span className="ml-2 text-xs text-blue-600">🚶 학교 근처 희망</span>}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* 방 정보 */}
+                  {(request.roomcount || request.bathroomcount) && (
+                    <div>
+                      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        방 구조
+                      </p>
+                      <p className="text-sm text-slate-700">
+                        {request.roomcount && `방 ${request.roomcount}개`}
+                        {request.roomcount && request.bathroomcount && ' · '}
+                        {request.bathroomcount && `욕실 ${request.bathroomcount}개`}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* 건물 노후도 */}
+                  {request.maxBuildingAge && (
+                    <div>
+                      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        건물 노후도
+                      </p>
+                      <p className="text-sm text-slate-700">
+                        {request.maxBuildingAge === 1 && '5년 이하'}
+                        {request.maxBuildingAge === 2 && '10년 이하'}
+                        {request.maxBuildingAge === 3 && '20년 이하'}
+                        {request.maxBuildingAge === 4 && '30년 이하'}
+                        {request.maxBuildingAge === 5 && '상관없음'}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* 가전제품 옵션 */}
+                  {(request.airconYn === 'Y' || request.washerYn === 'Y' || request.fridgeYn === 'Y') && (
+                    <div>
+                      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        가전제품
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {request.airconYn === 'Y' && (
+                          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                            에어컨
+                          </span>
+                        )}
+                        {request.washerYn === 'Y' && (
+                          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                            세탁기
+                          </span>
+                        )}
+                        {request.fridgeYn === 'Y' && (
+                          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                            냉장고
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 {/* 추가 조건 - 말풍선 느낌 */}
                 {request.additionalCondition && (
-                  <div>
+                  <div className="mt-6">
                     <div className="mb-2 flex items-center gap-2">
                       <span className="text-base">💬</span>
                       <p className="text-sm font-semibold text-slate-500">

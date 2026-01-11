@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/common/Button';
-import { getRecommendationById } from '@/lib/repositories/recommendRepository';
-import { RecommendedListing, RiskLevel } from '@/types/recommended';
+// import { getRecommendationById } from '@/lib/repositories/recommendRepository';
+// import { RecommendedListing, RiskLevel } from '@/types/recommended';
 import { ChatbotWidget } from '@/components/chat/ChatbotWidget';
 import { addToWishlist } from '@/lib/repositories/wishlistRepository';
+import { ImageGallery } from '@/components/common/ImageGallery';
 
 const LISTING_TYPE_LABEL: Record<string, string> = {
   apartment: '아파트',
@@ -28,7 +29,6 @@ export default function RecommendationDetailPage() {
   const [listing, setListing] = useState<RecommendedListing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
 
   const listingId = String(params.id);
@@ -99,74 +99,7 @@ export default function RecommendationDetailPage() {
       </div>
 
       {/* 이미지 갤러리 */}
-      <div className="overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-slate-200">
-        {listing.images.length >= 3 ? (
-          /* 3장 이상일 경우 슬라이더 */
-          <div className="relative">
-            <img
-              src={listing.images[currentImageIndex]}
-              alt={`${listing.title} - ${currentImageIndex + 1}`}
-              className="h-96 w-full object-cover"
-              onError={(e) => {
-                e.currentTarget.src = 'https://picsum.photos/seed/default/600/400';
-              }}
-            />
-
-            {/* 이전 버튼 */}
-            <button
-              onClick={() => setCurrentImageIndex((prev) =>
-                prev === 0 ? listing.images.length - 1 : prev - 1
-              )}
-              className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-3 text-white hover:bg-black/70 transition"
-            >
-              ◀
-            </button>
-
-            {/* 다음 버튼 */}
-            <button
-              onClick={() => setCurrentImageIndex((prev) =>
-                prev === listing.images.length - 1 ? 0 : prev + 1
-              )}
-              className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-black/50 p-3 text-white hover:bg-black/70 transition"
-            >
-              ▶
-            </button>
-
-            {/* 인디케이터 */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-              {listing.images.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentImageIndex(index)}
-                  className={`h-2 w-2 rounded-full transition ${
-                    index === currentImageIndex ? 'bg-white w-6' : 'bg-white/50'
-                  }`}
-                />
-              ))}
-            </div>
-
-            {/* 이미지 카운터 */}
-            <div className="absolute top-4 right-4 rounded-full bg-black/50 px-3 py-1 text-sm text-white">
-              {currentImageIndex + 1} / {listing.images.length}
-            </div>
-          </div>
-        ) : (
-          /* 3장 미만일 경우 그리드 */
-          <div className="grid gap-2 md:grid-cols-2">
-            {listing.images.map((image, index) => (
-              <img
-                key={index}
-                src={image}
-                alt={`${listing.title} - ${index + 1}`}
-                className="h-80 w-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.src = 'https://picsum.photos/seed/default/600/400';
-                }}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      <ImageGallery images={listing.images} alt={listing.title} />
 
       {/* 기본 정보 */}
       <div className="overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-slate-200">

@@ -54,14 +54,14 @@ export default function OwnerLayout({ children }: { children: ReactNode }) {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <nav className="flex flex-wrap gap-3 text-sm font-medium">
-            <Link href="/owner" className="rounded px-3 py-2 hover:bg-emerald-50">
-              홈
-            </Link>
             <Link href="/owner/listings" className="rounded px-3 py-2 hover:bg-emerald-50">
               내 매물
             </Link>
             <Link href="/owner/listings/new" className="rounded px-3 py-2 hover:bg-emerald-50">
               매물 등록
+            </Link>
+            <Link href="/owner/recommendations" className="rounded px-3 py-2 hover:bg-emerald-50">
+              임차인 매칭
             </Link>
             <Link href="/owner/contacts" className="rounded px-3 py-2 hover:bg-emerald-50">
               컨택 요청

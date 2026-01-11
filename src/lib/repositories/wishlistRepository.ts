@@ -1,7 +1,7 @@
 import { WishlistItem } from '@/types/wishlist';
 import { userStore } from '../auth/userStore';
 import { USE_MOCK } from '@/config/env';
-import { wishlistMock } from '@/mocks/wishlist.mock';
+import { wishlistMock } from '@/mocks/finder/wishlist.mock';
 
 const BASE_PATH = '/finder/wishlist';
 

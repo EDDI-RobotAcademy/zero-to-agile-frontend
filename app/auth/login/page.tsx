@@ -25,7 +25,7 @@ function LoginContent() {
 
   const nextPath = useMemo(() => {
     if (roleParam === 'finder') return '/finder';
-    if (roleParam === 'owner') return '/owner';
+    if (roleParam === 'owner') return '/owner/listings';
     return '/auth/role-select';
   }, [roleParam]);
 
