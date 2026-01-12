@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Button } from '@/components/common/Button';
-import { Card } from '@/components/common/Card';
 import { useRole } from '@/lib/auth/roleContext';
 import {
   getFinderRequestById,
@@ -14,6 +12,21 @@ import {
   STATUS_LABEL,
 } from '@/types/houseOptions';
 import { formatDate } from '@/lib/utils/dateUtils';
+import {
+  FileText,
+  MapPin,
+  Home,
+  Wallet,
+  Banknote,
+  CreditCard,
+  School,
+  AirVent,
+  WashingMachine,
+  Refrigerator,
+  Pencil,
+  Trash2,
+  Sparkles,
+} from 'lucide-react';
 
 export default function FinderRequestDetailPage() {
   const router = useRouter();
@@ -85,61 +98,44 @@ export default function FinderRequestDetailPage() {
 
       {/* 로딩 */}
       {loading && (
-        <Card title="불러오는 중" actions={null}>
-          <p className="text-slate-700">의뢰서를 불러오는 중이에요...</p>
-        </Card>
+        <div className="rounded-2xl border border-slate-100 bg-white p-8 text-center">
+          <p className="text-sm text-slate-600">의뢰서를 불러오는 중...</p>
+        </div>
       )}
 
       {/* 의뢰서 상세 */}
       {!loading && request && (
         <>
           {/* 최상단 헤더 영역 */}
-          <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-sky-50 via-white to-blue-50 p-8 shadow-lg ring-1 ring-slate-100">
-            {/* 상단 행: 상태 배지 (좌) + 작성일/수정일 (우) */}
-            <div className="mb-6 flex items-center justify-between">
-              {/* 상태 배지 - 작고 심플하게 */}
-              <div className="flex items-center gap-3">
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold ${
-                    request.status === "Y"
-                      ? "bg-blue-50 text-blue-700 ring-1 ring-blue-200"
-                      : "bg-slate-100 text-slate-600"
-                  }`}
-                >
+          <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 via-white to-blue-50 p-8 shadow-sm ring-1 ring-blue-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[12px] font-medium tracking-tight text-blue-500 ml-0.5">의뢰서 상세</p>
+                <h2 className="text-[26px] font-semibold tracking-[-0.015em] mb-1 text-slate-900">
+                  의뢰서 #{requestId}
+                </h2>
+                <div className="flex gap-1.5">
                   <span
-                    className={`h-1.5 w-1.5 rounded-full ${
+                    className={`rounded-full px-2.5 py-0.5 text-[12px] font-medium ${
                       request.status === "Y"
-                        ? "bg-blue-500 animate-pulse"
-                        : "bg-slate-400"
+                        ? "bg-blue-50 text-blue-600"
+                        : "bg-slate-100 text-slate-600"
                     }`}
-                  ></span>
-                  {STATUS_LABEL[request.status]}
-                </span>
+                  >
+                    {STATUS_LABEL[request.status]}
+                  </span>
+                </div>
               </div>
-
-              {/* 작성일 · 수정일 */}
               {(request.createdAt || request.updatedAt) && (
-                <div className="flex flex-wrap gap-3 text-xs text-slate-500">
+                <div className="flex flex-wrap gap-3 text-xs text-slate-400">
                   {request.createdAt && (
-                    <span>
-                      작성일: {formatDate(request.createdAt)}
-                    </span>
+                    <span>작성일: {formatDate(request.createdAt)}</span>
                   )}
                   {request.updatedAt && (
-                    <span>
-                      수정일: {formatDate(request.updatedAt)}
-                    </span>
+                    <span>수정일: {formatDate(request.updatedAt)}</span>
                   )}
                 </div>
               )}
-            </div>
-
-            {/* 메인 행: 의뢰서 번호 */}
-            <div>
-              <p className="text-sm font-semibold text-sky-700">의뢰서</p>
-              <h1 className="text-3xl font-extrabold text-slate-900">
-                #{requestId}
-              </h1>
             </div>
           </div>
 
@@ -161,173 +157,164 @@ export default function FinderRequestDetailPage() {
             </div>
           </button>
 
-          {/* 본문 섹션 - 단일 카드 */}
-          <div className="overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-slate-200">
-            {/* 섹션 A: 핵심 정보 */}
-            <div className="border-b border-slate-100 p-8">
-              <div className="mb-4 flex items-center gap-2">
-                <span className="text-lg">📋</span>
-                <h2 className="text-lg font-bold text-slate-900">핵심 정보</h2>
+          {/* 희망 조건 */}
+          <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-slate-200">
+            <div className="border-b border-slate-100 bg-white px-6 py-4">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-blue-400" />
+                <h3 className="text-base font-semibold tracking-tight text-slate-900">희망 조건</h3>
               </div>
-
-              {/* 지역 + 부동산유형 / 임대유형 */}
-              <div className="mb-6 border-b border-slate-100 pb-6 text-xl font-bold text-slate-900">
-                {request.preferredRegion} {request.houseType}{' '}
-                <span className="text-slate-400">/</span>{' '}
-                <span className="text-blue-600">
-                  {request.priceType}
-                </span>
-              </div>
-
-              {/* 금액 정보 - 숫자 중심 */}
-              <div className="grid gap-6 sm:grid-cols-2">
-                <div>
-                  <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    보증금
-                  </p>
-                  <p className="text-2xl font-extrabold text-slate-900">
-                    {Number(request.maxDeposit ?? 0).toLocaleString()}
-                    <span className="ml-1 text-base font-normal text-slate-500">
-                      만원
-                    </span>
-                  </p>
+            </div>
+            <div className="flex flex-col gap-4 p-6">
+              <div className="flex items-start gap-2">
+                <MapPin className="mt-[2px] h-4 w-4 text-blue-400" />
+                <div className="flex-1">
+                  <p className="text-[12px] font-medium text-slate-400">희망 지역</p>
+                  <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">{request.preferredRegion}</p>
                 </div>
-
-                {request.priceType === "월세" && (
-                  <div>
-                    <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      월세
-                    </p>
-                    <p className="text-2xl font-extrabold text-blue-600">
-                      {Number(request.maxRent ?? 0).toLocaleString()}
-                      <span className="ml-1 text-base font-normal text-slate-500">
-                        만원
-                      </span>
+              </div>
+              <div className="flex items-start gap-2">
+                <Home className="mt-[2px] h-4 w-4 text-blue-400" />
+                <div className="flex-1">
+                  <p className="text-[12px] font-medium text-slate-400">매물 유형</p>
+                  <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">{request.houseType}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <Wallet className="mt-[2px] h-4 w-4 text-blue-400" />
+                <div className="flex-1">
+                  <p className="text-[12px] font-medium text-slate-400">계약 유형</p>
+                  <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">{request.priceType}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <Banknote className="mt-[2px] h-4 w-4 text-blue-400" />
+                <div className="flex-1">
+                  <p className="text-[12px] font-medium text-slate-400">최대 보증금</p>
+                  <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">{Number(request.maxDeposit ?? 0).toLocaleString()} 만원</p>
+                </div>
+              </div>
+              {request.priceType === "월세" && request.maxRent > 0 && (
+                <div className="flex items-start gap-2">
+                  <CreditCard className="mt-[2px] h-4 w-4 text-blue-400" />
+                  <div className="flex-1">
+                    <p className="text-[12px] font-medium text-slate-400">최대 월세</p>
+                    <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">{Number(request.maxRent).toLocaleString()} 만원</p>
+                  </div>
+                </div>
+              )}
+              {request.universityName && (
+                <div className="flex items-start gap-2">
+                  <School className="mt-[2px] h-4 w-4 text-blue-400" />
+                  <div className="flex-1">
+                    <p className="text-[12px] font-medium text-slate-400">대학교</p>
+                    <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">{request.universityName}</p>
+                  </div>
+                </div>
+              )}
+              {(request.roomcount || request.bathroomcount) && (
+                <div className="flex items-start gap-2">
+                  <Home className="mt-[2px] h-4 w-4 text-blue-400" />
+                  <div className="flex-1">
+                    <p className="text-[12px] font-medium text-slate-400">방 구조</p>
+                    <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">
+                      {request.roomcount && `방 ${request.roomcount}개`}
+                      {request.roomcount && request.bathroomcount && ' · '}
+                      {request.bathroomcount && `욕실 ${request.bathroomcount}개`}
                     </p>
                   </div>
+                </div>
+              )}
+              {request.maxBuildingAge && (
+                <div className="flex items-start gap-2">
+                  <Home className="mt-[2px] h-4 w-4 text-blue-400" />
+                  <div className="flex-1">
+                    <p className="text-[12px] font-medium text-slate-400">건물 노후도</p>
+                    <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">
+                      {request.maxBuildingAge === 1 && '5년 이하'}
+                      {request.maxBuildingAge === 2 && '10년 이하'}
+                      {request.maxBuildingAge === 3 && '20년 이하'}
+                      {request.maxBuildingAge === 4 && '30년 이하'}
+                      {request.maxBuildingAge === 5 && '상관없음'}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 추가 옵션 */}
+          <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-slate-200">
+            <div className="border-b border-slate-100 bg-white px-6 py-4">
+              <div className="flex items-center gap-2">
+                <Home className="h-4 w-4 text-blue-400" />
+                <h3 className="text-base font-semibold tracking-tight text-slate-900">추가 옵션</h3>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="flex flex-wrap gap-2">
+                {request.isNear && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-xs font-semibold text-blue-700">
+                    <School className="h-3.5 w-3.5" />
+                    학교 근처
+                  </span>
+                )}
+                {request.airconYn === 'Y' && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+                    <AirVent className="h-3.5 w-3.5" />
+                    에어컨
+                  </span>
+                )}
+                {request.washerYn === 'Y' && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-100 px-3 py-1.5 text-xs font-semibold text-purple-700">
+                    <WashingMachine className="h-3.5 w-3.5" />
+                    세탁기
+                  </span>
+                )}
+                {request.fridgeYn === 'Y' && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-pink-100 px-3 py-1.5 text-xs font-semibold text-pink-700">
+                    <Refrigerator className="h-3.5 w-3.5" />
+                    냉장고
+                  </span>
+                )}
+                {!request.isNear && request.airconYn !== 'Y' && request.washerYn !== 'Y' && request.fridgeYn !== 'Y' && (
+                  <span className="text-sm text-slate-500">추가 옵션 없음</span>
                 )}
               </div>
             </div>
+          </div>
 
-            {/* 섹션 B: 상세 정보 */}
-            {(request.universityName || request.roomcount || request.bathroomcount || request.maxBuildingAge || request.additionalCondition) && (
-              <div className="p-8">
-                <div className="mb-4 flex items-center gap-2">
-                  <span className="text-lg">📌</span>
-                  <h3 className="text-lg font-bold text-slate-900">
-                    상세 정보
-                  </h3>
+          {/* 기타 요구사항 */}
+          {request.additionalCondition && (
+            <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-slate-200">
+              <div className="border-b border-slate-100 bg-white px-6 py-4">
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-blue-400" />
+                  <h3 className="text-base font-semibold tracking-tight text-slate-900">기타 요구사항</h3>
                 </div>
-
-                <div className="space-y-4">
-                  {/* 학교 정보 */}
-                  {request.universityName && (
-                    <div>
-                      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        대학교
-                      </p>
-                      <p className="text-sm text-slate-700">
-                        {request.universityName}
-                        {request.isNear && <span className="ml-2 text-xs text-blue-600">🚶 학교 근처 희망</span>}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* 방 정보 */}
-                  {(request.roomcount || request.bathroomcount) && (
-                    <div>
-                      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        방 구조
-                      </p>
-                      <p className="text-sm text-slate-700">
-                        {request.roomcount && `방 ${request.roomcount}개`}
-                        {request.roomcount && request.bathroomcount && ' · '}
-                        {request.bathroomcount && `욕실 ${request.bathroomcount}개`}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* 건물 노후도 */}
-                  {request.maxBuildingAge && (
-                    <div>
-                      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        건물 노후도
-                      </p>
-                      <p className="text-sm text-slate-700">
-                        {request.maxBuildingAge === 1 && '5년 이하'}
-                        {request.maxBuildingAge === 2 && '10년 이하'}
-                        {request.maxBuildingAge === 3 && '20년 이하'}
-                        {request.maxBuildingAge === 4 && '30년 이하'}
-                        {request.maxBuildingAge === 5 && '상관없음'}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* 가전제품 옵션 */}
-                  {(request.airconYn === 'Y' || request.washerYn === 'Y' || request.fridgeYn === 'Y') && (
-                    <div>
-                      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        가전제품
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {request.airconYn === 'Y' && (
-                          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-                            에어컨
-                          </span>
-                        )}
-                        {request.washerYn === 'Y' && (
-                          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-                            세탁기
-                          </span>
-                        )}
-                        {request.fridgeYn === 'Y' && (
-                          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-                            냉장고
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* 추가 조건 - 말풍선 느낌 */}
-                {request.additionalCondition && (
-                  <div className="mt-6">
-                    <div className="mb-2 flex items-center gap-2">
-                      <span className="text-base">💬</span>
-                      <p className="text-sm font-semibold text-slate-500">
-                        추가 조건
-                      </p>
-                    </div>
-                    <div className="rounded-xl border-l-4 border-blue-400 bg-blue-50 p-4">
-                      <p className="whitespace-pre-wrap text-base leading-relaxed text-slate-700">
-                        {request.additionalCondition}
-                      </p>
-                    </div>
-                  </div>
-                )}
               </div>
-            )}
-
-            {/* 섹션 하단: 수정/삭제 버튼 */}
-            <div className="border-t border-slate-100 px-6 py-4">
-              <div className="flex justify-end gap-2">
-                <Button
-                  variant="secondary"
-                  onClick={handleEdit}
-                  className="rounded-lg px-4 py-2 text-sm"
-                >
-                  수정
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={handleDelete}
-                  className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700 hover:bg-red-100"
-                >
-                  삭제
-                </Button>
+              <div className="p-6">
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{request.additionalCondition}</p>
               </div>
             </div>
+          )}
+
+          {/* 수정/삭제 버튼 */}
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={handleEdit}
+              className="inline-flex items-center gap-1.5 rounded-xl border-2 border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 active:scale-[0.98]"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+              수정
+            </button>
+            <button
+              onClick={handleDelete}
+              className="inline-flex items-center gap-1.5 rounded-xl border-2 border-red-300 bg-white px-4 py-2 text-sm font-semibold text-red-700 shadow-sm transition-all hover:bg-red-50 active:scale-[0.98]"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              삭제
+            </button>
           </div>
         </>
       )}

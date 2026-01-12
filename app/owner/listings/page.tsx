@@ -5,7 +5,14 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/common/Button';
 import { getMyHousePlatforms, deleteHousePlatform } from '@/lib/repositories/ownerRepository';
 import { HousePlatform } from '@/types/owner';
-
+import {
+  Home,
+  MapPin,
+  Wallet,
+  Building2,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
 export default function OwnerListingsPage() {
   const router = useRouter();
   const [houses, setHouses] = useState<HousePlatform[]>([]);
@@ -44,20 +51,36 @@ export default function OwnerListingsPage() {
   return (
     <main className="space-y-6">
       {/* 헤더 */}
-      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 via-white to-green-50 p-8 shadow-sm ring-1 ring-slate-100">
+      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 via-white to-blue-50 p-8 shadow-sm ring-1 ring-blue-100">
         <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-sm font-semibold text-emerald-700">매물 관리</p>
-            <h2 className="text-3xl font-bold text-slate-900">
+          <div>
+            <p className="text-[12px] font-medium tracking-tight text-blue-500 ml-0.5">
+              매물 관리
+            </p>
+            <h2 className="text-[26px] font-semibold tracking-[-0.015em] mb-1 text-slate-900">
               내 매물 목록
             </h2>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm tracking-[-0.005em] leading-relaxed text-slate-500">
               등록한 매물을 확인하고 관리하세요.
             </p>
           </div>
           <Button
             onClick={() => router.push('/owner/listings/new')}
-            className="rounded-xl px-6 py-3 text-base"
+            className="
+              rounded-xl
+              px-5
+              py-2.5
+              text-sm
+              font-medium
+              tracking-tight
+              bg-blue-600
+              text-white
+              shadow-sm
+              hover:bg-blue-700
+              hover:shadow-md
+              active:scale-[0.98]
+              transition
+            "
           >
             + 매물 등록
           </Button>
@@ -90,59 +113,69 @@ export default function OwnerListingsPage() {
             <div
               key={house.housePlatformId}
               onClick={() => router.push(`/owner/listings/${house.housePlatformId}`)}
-              className="cursor-pointer overflow-hidden rounded-3xl bg-white shadow-lg ring-1 ring-slate-200 transition hover:shadow-xl"
+              className="
+                group
+                flex
+                cursor-pointer
+                flex-col
+                overflow-hidden
+                rounded-3xl
+                bg-white
+                ring-1
+                ring-slate-200
+                transition
+                hover:-translate-y-1
+                hover:shadow-lg
+              "
             >
               {/* 카드 헤더 */}
               <div className="border-b border-slate-100 bg-slate-50 px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">🏠</span>
-                    <h3 className="text-lg font-bold text-slate-900">
-                      {house.title}
-                    </h3>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+                <div className="flex items-center justify-between gap-4">
+                  <h3 className="truncate text-[15px] font-semibold tracking-tight text-slate-900">
+                    {house.title}
+                  </h3>
+
+                  <div className="flex items-center gap-1.5">
+                    <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[12px] font-medium text-blue-600">
                       {house.salesType}
                     </span>
                     <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        house.isBanned
-                          ? 'bg-red-100 text-red-700'
-                          : 'bg-green-100 text-green-700'
-                      }`}
+                      className={`rounded-full px-2.5 py-0.5 text-[12px] font-medium ${house.isBanned
+                          ? 'bg-red-50 text-red-600'
+                          : 'bg-blue-50 text-blue-600'
+                        }`}
                     >
-                      {house.isBanned ? '차단됨' : '활성'}
+                      {house.isBanned ? '차단' : '활성'}
                     </span>
                   </div>
                 </div>
               </div>
 
               {/* 카드 내용 */}
-              <div className="space-y-4 p-6">
+              <div className="flex flex-1 flex-col gap-5 p-6">
                 {/* 주소 */}
                 <div className="flex items-start gap-2">
-                  <span className="text-base">📍</span>
+                  <MapPin className="mt-[2px] h-4 w-4 text-blue-400" />
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-slate-700">주소</p>
-                    <p className="text-sm text-slate-600">{house.address}</p>
-                    <p className="text-xs text-slate-500">
-                      {house.guNm} {house.dongNm}
+                    <p className="text-[12px] font-medium text-slate-400">주소</p>
+                    <p className="mt-1 text-[14px] leading-[1.5] text-slate-700">
+                      {house.address}
                     </p>
                   </div>
                 </div>
 
                 {/* 가격 정보 */}
                 <div className="flex items-start gap-2">
-                  <span className="text-base">💰</span>
+                  <Wallet className="mt-[2px] h-4 w-4 text-blue-400" />
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-slate-700">가격 정보</p>
-                    <p className="text-sm text-slate-600">
+                    <p className="text-[12px] font-medium text-slate-400">가격 정보</p>
+                    <p className="mt-1 text-[14px] leading-[1.5] text-slate-700">
                       보증금 {house.deposit.toLocaleString()}만원
-                      {house.monthlyRent > 0 && ` · 월세 ${house.monthlyRent.toLocaleString()}만원`}
+                      {house.monthlyRent > 0 &&
+                        ` · 월세 ${house.monthlyRent.toLocaleString()}만원`}
                     </p>
                     {house.manageCost > 0 && (
-                      <p className="text-xs text-slate-500">
+                      <p className="mt-1 text-[13px] leading-[1.45] text-slate-500">
                         관리비 {house.manageCost.toLocaleString()}만원
                       </p>
                     )}
@@ -151,13 +184,13 @@ export default function OwnerListingsPage() {
 
                 {/* 매물 정보 */}
                 <div className="flex items-start gap-2">
-                  <span className="text-base">🏢</span>
+                  <Building2 className="mt-[2px] h-4 w-4 text-blue-400" />
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-slate-700">매물 정보</p>
-                    <p className="text-sm text-slate-600">
+                    <p className="text-[12px] font-medium text-slate-400">매물 정보</p>
+                    <p className="mt-1 text-[14px] leading-[1.5] text-slate-700">
                       {house.residenceType} · {house.roomType}
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="mt-1 text-[13px] leading-[1.45] text-slate-500">
                       전용 {house.exclusiveArea}㎡ · {house.floorNo}/{house.allFloors}층
                       {house.hasElevator && ' · 엘리베이터'}
                       {house.canPark && ' · 주차가능'}
@@ -166,24 +199,25 @@ export default function OwnerListingsPage() {
                 </div>
 
                 {/* 액션 버튼 */}
-                <div className="flex gap-2 pt-2">
-                  <Button
+                <div className="mt-auto flex justify-end gap-5 pt-3">
+                  <button
                     onClick={(e) => {
                       e.stopPropagation();
                       router.push(`/owner/listings/${house.housePlatformId}/edit`);
                     }}
-                    variant="secondary"
-                    className="flex-1 rounded-xl px-4 py-2 text-sm"
+                    className="flex items-center gap-1.5 text-[13px] font-medium text-slate-400 transition hover:text-blue-600"
                   >
+                    <Pencil className="h-4 w-4" />
                     수정
-                  </Button>
-                  <Button
+                  </button>
+
+                  <button
                     onClick={(e) => handleDelete(house.housePlatformId, e)}
-                    variant="secondary"
-                    className="rounded-xl px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                    className="flex items-center gap-1.5 text-[13px] font-medium text-slate-300 transition hover:text-red-500"
                   >
+                    <Trash2 className="h-4 w-4" />
                     삭제
-                  </Button>
+                  </button>
                 </div>
               </div>
             </div>

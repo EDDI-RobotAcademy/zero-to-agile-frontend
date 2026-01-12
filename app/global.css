@@ -2,17 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  overflow-y: scroll;
+}
+
 body {
   background: #f8fafc;
   color: #0f172a;
-  font-family: 'Pretendard', 'Noto Sans KR', system-ui, -apple-system, sans-serif;
   margin: 0;
 }
 
 a {
   color: #2563eb;
-}
-
-main {
-  padding: 24px;
 }

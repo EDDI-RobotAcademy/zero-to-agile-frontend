@@ -10,10 +10,13 @@ import {
   getFinderRequests,
 } from '@/lib/repositories/finderRepository';
 
-
 import { FinderRequest } from '@/types/finder';
-
 import { STATUS_LABEL } from "@/types/houseOptions";
+import {
+  MapPin,
+  Home,
+  Wallet,
+} from 'lucide-react';
 
 
 export default function FinderRequestPage() {
@@ -60,142 +63,146 @@ export default function FinderRequestPage() {
  return (
     <main className="space-y-6">
       {/* 헤더 */}
-      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 via-white to-blue-50 p-8 shadow-sm ring-1 ring-slate-100">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <p className="text-sm font-semibold text-sky-700">의뢰서</p>
-            <div className="flex items-baseline gap-2">
-              <h2 className="text-3xl font-bold text-slate-900">
-                내 매물 의뢰서
-              </h2>
-              {!loading && requests.length > 0 && (
-                <span className="text-lg font-semibold text-sky-600">
-                  ({requests.length}개)
-                </span>
-              )}
-            </div>
-            <p className="text-sm text-slate-600">
-              작성한 의뢰서를 한눈에 확인할 수 있어요.
+      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 via-white to-blue-50 p-8 shadow-sm ring-1 ring-blue-100">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[12px] font-medium tracking-tight text-blue-500 ml-0.5">
+              의뢰서 관리
+            </p>
+            <h2 className="text-[26px] font-semibold tracking-[-0.015em] mb-1 text-slate-900">
+              내 매물 의뢰서
+            </h2>
+            <p className="text-sm tracking-[-0.005em] leading-relaxed text-slate-500">
+              작성한 의뢰서를 확인하고 관리하세요
             </p>
           </div>
           <Button
             onClick={() => router.push("/finder/request/new")}
-            className="rounded-xl px-5 py-2.5 text-sm shadow-sm"
+            className="
+              rounded-xl
+              px-5
+              py-2.5
+              text-sm
+              font-medium
+              tracking-tight
+              bg-blue-600
+              text-white
+              shadow-sm
+              hover:bg-blue-700
+              hover:shadow-md
+              active:scale-[0.98]
+              transition
+            "
           >
-            + 새 의뢰서 작성
+            + 의뢰서 작성
           </Button>
         </div>
       </div>
 
-      {/* 에러 */}
-      {error && <p className="text-sm text-red-600">{error}</p>}
-
       {/* 로딩 */}
       {loading && (
-        <Card title="불러오는 중" actions={null}>
-          <p className="text-slate-700">
-            의뢰서를 불러오는 중이에요...
-          </p>
-        </Card>
+        <div className="rounded-2xl border border-slate-100 bg-white p-8 text-center">
+          <p className="text-sm text-slate-600">의뢰서를 불러오는 중...</p>
+        </div>
       )}
 
       {/* 의뢰서 없음 */}
       {!loading && requests.length === 0 && (
-        <Card title="의뢰서 없음" actions={null}>
-          <p className="text-slate-700">
-            아직 의뢰서를 작성하지 않았습니다.
-          </p>
+        <div className="rounded-2xl border border-slate-100 bg-white p-8 text-center">
+          <p className="text-sm text-slate-600">등록된 의뢰서가 없습니다.</p>
           <Button
-            className="mt-4 w-full rounded-xl py-3"
             onClick={() => router.push("/finder/request/new")}
+            className="mt-4 rounded-xl px-6 py-3"
           >
-            지금 작성하기
+            첫 의뢰서 작성하기
           </Button>
-        </Card>
+        </div>
       )}
 
-      {/* 의뢰서 목록 (작은 카드 여러 개) */}
+      {/* 의뢰서 목록 */}
       {!loading && requests.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2">
           {requests.map((request) => {
             const statusLabel = STATUS_LABEL[request.status];
 
             return (
-              <button
+              <div
                 key={request.finderRequestId}
-                type="button"
-                onClick={() =>
-                  router.push(`/finder/request/${request.finderRequestId}`)
-                }
-                className="text-left"
+                onClick={() => router.push(`/finder/request/${request.finderRequestId}`)}
+                className="
+                  group
+                  flex
+                  cursor-pointer
+                  flex-col
+                  overflow-hidden
+                  rounded-3xl
+                  bg-white
+                  ring-1
+                  ring-slate-200
+                  transition
+                  hover:-translate-y-1
+                  hover:shadow-lg
+                "
               >
-                <div className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg hover:border-blue-200">
-                  {/* 상단 */}
-                  <div className="border-b border-slate-100 bg-slate-50 px-4 py-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-base font-bold text-slate-900">
-                        의뢰서 #{request.finderRequestId}
-                      </h3>
+                {/* 카드 헤더 */}
+                <div className="border-b border-slate-100 bg-slate-50 px-6 py-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <h3 className="truncate text-[15px] font-semibold tracking-tight text-slate-900">
+                      의뢰서 #{request.finderRequestId}
+                    </h3>
+
+                    <div className="flex items-center gap-1.5">
                       <span
-                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+                        className={`rounded-full px-2.5 py-0.5 text-[12px] font-medium ${
                           request.status === "Y"
-                            ? "bg-blue-50 text-blue-700 ring-1 ring-blue-200"
-                            : "bg-slate-100 text-slate-600"
+                            ? 'bg-blue-50 text-blue-600'
+                            : 'bg-slate-100 text-slate-600'
                         }`}
                       >
-                        <span
-                          className={`h-1.5 w-1.5 rounded-full ${
-                            request.status === "Y"
-                              ? "bg-blue-500 animate-pulse"
-                              : "bg-slate-400"
-                          }`}
-                        ></span>
                         {statusLabel}
                       </span>
                     </div>
                   </div>
+                </div>
 
-                  {/* 내용 */}
-                  <div className="space-y-3 p-4">
-                    {/* 지역 */}
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
-                      <span className="text-base">🗺️</span>
-                      {request.preferredRegion}
+                {/* 카드 내용 */}
+                <div className="flex flex-1 flex-col gap-5 p-6">
+                  {/* 지역 */}
+                  <div className="flex items-start gap-2">
+                    <MapPin className="mt-[2px] h-4 w-4 text-blue-400" />
+                    <div className="flex-1">
+                      <p className="text-[12px] font-medium text-slate-400">희망 지역</p>
+                      <p className="mt-1 text-[14px] leading-[1.5] text-slate-700">
+                        {request.preferredRegion}
+                      </p>
                     </div>
+                  </div>
 
-                    {/* 부동산 유형 + 임대 유형 */}
-                    <div className="flex items-center gap-2 text-sm text-slate-700">
-                      <span className="text-base">🏠</span>
-                      {request.houseType} · {request.priceType}
+                  {/* 매물 유형 */}
+                  <div className="flex items-start gap-2">
+                    <Home className="mt-[2px] h-4 w-4 text-blue-400" />
+                    <div className="flex-1">
+                      <p className="text-[12px] font-medium text-slate-400">매물 유형</p>
+                      <p className="mt-1 text-[14px] leading-[1.5] text-slate-700">
+                        {request.houseType} · {request.priceType}
+                      </p>
                     </div>
+                  </div>
 
-                    {/* 금액 강조 */}
-                    <div className="flex items-baseline gap-2 border-t border-slate-100 pt-3">
-                      <span className="text-base">💰</span>
-                      <div>
-                        <p className="text-xs text-slate-500">보증금</p>
-                        <p className="text-lg font-bold text-slate-900">
-                          {Number(request.maxDeposit ?? 0).toLocaleString()}
-                          <span className="ml-1 text-sm font-normal text-slate-500">
-                            만원
-                          </span>
-                        </p>
-                      </div>
-                      {request.priceType === "월세" && (
-                        <div className="ml-auto">
-                          <p className="text-xs text-slate-500">월세</p>
-                          <p className="text-lg font-bold text-blue-600">
-                            {Number(request.maxRent ?? 0).toLocaleString()}
-                            <span className="ml-1 text-sm font-normal text-slate-500">
-                              만원
-                            </span>
-                          </p>
-                        </div>
-                      )}
+                  {/* 가격 정보 */}
+                  <div className="flex items-start gap-2">
+                    <Wallet className="mt-[2px] h-4 w-4 text-blue-400" />
+                    <div className="flex-1">
+                      <p className="text-[12px] font-medium text-slate-400">희망 가격</p>
+                      <p className="mt-1 text-[14px] leading-[1.5] text-slate-700">
+                        보증금 {Number(request.maxDeposit ?? 0).toLocaleString()}만원
+                        {request.priceType === "월세" &&
+                          ` · 월세 ${Number(request.maxRent ?? 0).toLocaleString()}만원`}
+                      </p>
                     </div>
                   </div>
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>

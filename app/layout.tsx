@@ -1,4 +1,5 @@
 import './global.css';
+import '@fontsource/pretendard';
 import { RoleProvider } from '@/lib/auth/roleContext';
 // 1. 라이브러리 import
 import { GoogleTagManager } from '@next/third-parties/google';
@@ -16,9 +17,7 @@ export default function RootLayout({
       <GoogleTagManager gtmId={gtmId} />
       <body>
         <RoleProvider>
-          <div className="min-h-screen bg-slate-50">
-            <div className="mx-auto max-w-5xl py-8">{children}</div>
-          </div>
+          {children}
         </RoleProvider>
       </body>
     </html>

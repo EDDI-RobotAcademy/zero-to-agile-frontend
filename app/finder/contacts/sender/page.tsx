@@ -66,23 +66,20 @@ export default function SentContactsPage() {
   return (
     <main className="space-y-6">
       {/* 헤더 */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-100 via-white to-teal-50 px-8 py-8 shadow-lg ring-1 ring-emerald-100">
-        <div className="relative z-10">
-          <div className="mb-3 flex items-center gap-2.5">
-            <div className="rounded-lg bg-emerald-600 p-1.5">
-              <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
-            </div>
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">Sent</span>
+      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 via-white to-blue-50 p-8 shadow-sm ring-1 ring-blue-100">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[12px] font-medium tracking-tight text-blue-500 ml-0.5">
+              보낸 컨텍
+            </p>
+            <h2 className="text-[26px] font-semibold tracking-[-0.015em] mb-1 text-slate-900">
+              내가 보낸 컨텍 요청
+            </h2>
+            <p className="text-sm tracking-[-0.005em] leading-relaxed text-slate-500">
+              임대인에게 보낸 컨텍 요청을 확인하고 관리하세요
+            </p>
           </div>
-          <h1 className="mb-2 text-3xl font-bold text-slate-900">내가 보낸 컨텍 요청</h1>
-          <p className="text-sm text-slate-600">
-            임대인에게 보낸 컨텍 요청을 확인하고 관리하세요
-          </p>
         </div>
-        <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-emerald-200/30 blur-2xl"></div>
-        <div className="absolute -bottom-4 -left-4 h-24 w-24 rounded-full bg-teal-200/30 blur-2xl"></div>
       </div>
 
       {/* 에러 */}
@@ -117,35 +114,34 @@ export default function SentContactsPage() {
         {contacts.map((contact) => (
           <div
             key={contact.sendMessageId}
-            className="group relative overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200 transition-all duration-300 hover:shadow-lg hover:ring-2 hover:ring-emerald-300"
+            className="group relative overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200 transition-all duration-300 hover:shadow-lg hover:ring-2 hover:ring-blue-300"
           >
             <div className="p-6">
               {/* 상단: 상태 배지 */}
-              <div className="mb-4 flex items-center gap-2">
+              <div className="mb-4">
                 {getStatusBadge(contact.acceptType)}
-                <span className="text-xs text-slate-400">(acceptType: {contact.acceptType})</span>
               </div>
 
               {/* 매물 제목 */}
               <div className="mb-4 flex items-start gap-3">
-                <div className="flex-shrink-0 rounded-lg bg-gradient-to-br from-emerald-100 to-teal-100 p-2.5 shadow-sm">
-                  <svg className="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="flex-shrink-0 rounded-lg bg-gradient-to-br from-blue-100 to-indigo-100 p-2.5 shadow-sm">
+                  <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                   </svg>
                 </div>
-                <h3 className="flex-1 text-lg font-bold text-slate-900 transition-colors group-hover:text-emerald-700">
+                <h3 className="flex-1 text-lg font-bold text-slate-900 transition-colors group-hover:text-blue-700">
                   매물 #{contact.housePlatformId}
                 </h3>
               </div>
 
               {/* 내가 보낸 메시지 */}
-              <div className="relative mb-5 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 p-4 shadow-sm">
-                <div className="absolute -left-1.5 top-3 h-3 w-3 rotate-45 bg-gradient-to-br from-emerald-50 to-teal-50"></div>
+              <div className="relative mb-5 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 p-4 shadow-sm">
+                <div className="absolute -left-1.5 top-3 h-3 w-3 rotate-45 bg-gradient-to-br from-blue-50 to-indigo-50"></div>
                 <div className="mb-1.5 flex items-center gap-1.5">
-                  <svg className="h-3.5 w-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-3.5 w-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                   </svg>
-                  <span className="text-xs font-bold text-emerald-700">내가 보낸 메시지</span>
+                  <span className="text-xs font-bold text-blue-700">내가 보낸 메시지</span>
                 </div>
                 <p className="text-sm leading-relaxed text-slate-700">
                   {contact.message}
@@ -157,7 +153,7 @@ export default function SentContactsPage() {
                 <div className="flex flex-wrap items-center gap-2.5">
                   <Link
                     href={`/finder/house/${contact.housePlatformId}?acceptType=${contact.acceptType}`}
-                    className="inline-flex items-center gap-2 rounded-lg border-2 border-emerald-600 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition-all hover:bg-emerald-50"
+                    className="inline-flex items-center gap-2 rounded-lg border-2 border-blue-600 bg-white px-4 py-2 text-sm font-semibold text-blue-700 shadow-sm transition-all hover:bg-blue-50"
                   >
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
