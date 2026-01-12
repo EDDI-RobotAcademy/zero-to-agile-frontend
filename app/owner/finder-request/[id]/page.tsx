@@ -4,6 +4,22 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getFinderRequestById } from '@/lib/repositories/finderRepository';
 import { FinderRequest } from '@/types/finder';
+import {
+  FileText,
+  User,
+  Phone,
+  Lock,
+  MapPin,
+  Home,
+  Wallet,
+  Banknote,
+  CreditCard,
+  School,
+  AirVent,
+  WashingMachine,
+  Refrigerator,
+  ArrowLeft,
+} from 'lucide-react';
 
 type PageProps = { params: Promise<{ id: string }> };
 
@@ -74,49 +90,40 @@ export default function OwnerFinderRequestDetailPage({ params }: PageProps) {
   return (
     <main className="space-y-6">
       {/* 헤더 */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-100 via-white to-indigo-50 px-8 py-8 shadow-lg ring-1 ring-blue-100">
-        <div className="relative z-10">
-          <div className="mb-3 flex items-center gap-2.5">
-            <div className="rounded-lg bg-blue-600 p-1.5">
-              <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <span className="text-xs font-bold uppercase tracking-wider text-blue-700">Request</span>
+      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 via-white to-blue-50 p-8 shadow-sm ring-1 ring-blue-100">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[12px] font-medium tracking-tight text-blue-500 ml-0.5">
+              의뢰서 상세
+            </p>
+            <h2 className="text-[26px] font-semibold tracking-[-0.015em] mb-1 text-slate-900">
+              의뢰서 #{finderRequest.finderRequestId}
+            </h2>
+            <p className="text-sm tracking-[-0.005em] leading-relaxed text-slate-500">
+              임차인의 집 찾기 요청서입니다
+            </p>
           </div>
-          <h1 className="mb-2 text-3xl font-bold text-slate-900">의뢰서 #{finderRequest.finderRequestId}</h1>
-          <p className="text-sm text-slate-600">
-            임차인의 집 찾기 요청서입니다
-          </p>
         </div>
-        <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-blue-200/30 blur-2xl"></div>
-        <div className="absolute -bottom-4 -left-4 h-24 w-24 rounded-full bg-indigo-200/30 blur-2xl"></div>
       </div>
 
       {/* 임차인 정보 */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200">
-        <div className="border-b border-slate-100 bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4">
+      <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-slate-200">
+        <div className="border-b border-slate-100 bg-white px-6 py-4">
           <div className="flex items-center gap-2">
-            <div className="rounded-lg bg-emerald-600 p-1.5">
-              <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-bold text-slate-900">임차인 정보</h3>
+            <User className="h-4 w-4 text-blue-400" />
+            <h3 className="text-base font-semibold tracking-tight text-slate-900">임차인 정보</h3>
           </div>
         </div>
         <div className="p-6">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">📱</span>
+          <div className="flex items-start gap-2">
+            <Phone className="mt-[2px] h-4 w-4 text-blue-400" />
             <div className="flex-1">
-              <p className="text-xs font-semibold text-slate-500 mb-1">연락처</p>
+              <p className="text-[12px] font-medium text-slate-400">연락처</p>
               {acceptType === 'Y' && finderRequest.phoneNumber ? (
-                <p className="text-base font-semibold text-slate-900">{finderRequest.phoneNumber}</p>
+                <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">{finderRequest.phoneNumber}</p>
               ) : (
-                <div className="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
-                  <svg className="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
+                <div className="mt-2 flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
+                  <Lock className="h-4 w-4 text-amber-600" />
                   <p className="text-sm font-medium text-amber-800">임차인이 컨텍 요청을 수락하면 번호가 공개됩니다.</p>
                 </div>
               )}
@@ -126,69 +133,123 @@ export default function OwnerFinderRequestDetailPage({ params }: PageProps) {
       </div>
 
       {/* 희망 조건 */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200">
-        <div className="border-b border-slate-100 bg-slate-50 px-6 py-4">
-          <h3 className="text-lg font-bold text-slate-900">희망 조건</h3>
-        </div>
-        <div className="p-6">
-          <div className="grid gap-4 text-sm md:grid-cols-2">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-700">📍 희망 지역:</span>
-              <span className="text-slate-600">{finderRequest.preferredRegion || '-'}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-700">🏠 매물 유형:</span>
-              <span className="text-slate-600">{finderRequest.houseType}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-700">💰 계약 유형:</span>
-              <span className="text-slate-600">{finderRequest.priceType}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-700">💵 최대 보증금:</span>
-              <span className="text-slate-600">{finderRequest.maxDeposit?.toLocaleString() || 0} 만원</span>
-            </div>
-            {finderRequest.maxRent > 0 && (
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-slate-700">💸 최대 월세:</span>
-                <span className="text-slate-600">{finderRequest.maxRent.toLocaleString()} 만원</span>
-              </div>
-            )}
-            {/* {finderRequest.phoneNumber && (
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-slate-700">📱 연락처:</span>
-                <span className="text-slate-600">{finderRequest.phoneNumber}</span>
-              </div>
-            )} */}
+      <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-slate-200">
+        <div className="border-b border-slate-100 bg-white px-6 py-4">
+          <div className="flex items-center gap-2">
+            <FileText className="h-4 w-4 text-blue-400" />
+            <h3 className="text-base font-semibold tracking-tight text-slate-900">희망 조건</h3>
           </div>
+        </div>
+        <div className="flex flex-col gap-4 p-6">
+          <div className="flex items-start gap-2">
+            <MapPin className="mt-[2px] h-4 w-4 text-blue-400" />
+            <div className="flex-1">
+              <p className="text-[12px] font-medium text-slate-400">희망 지역</p>
+              <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">{finderRequest.preferredRegion || '-'}</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-2">
+            <Home className="mt-[2px] h-4 w-4 text-blue-400" />
+            <div className="flex-1">
+              <p className="text-[12px] font-medium text-slate-400">매물 유형</p>
+              <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">{finderRequest.houseType}</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-2">
+            <Wallet className="mt-[2px] h-4 w-4 text-blue-400" />
+            <div className="flex-1">
+              <p className="text-[12px] font-medium text-slate-400">계약 유형</p>
+              <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">{finderRequest.priceType}</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-2">
+            <Banknote className="mt-[2px] h-4 w-4 text-blue-400" />
+            <div className="flex-1">
+              <p className="text-[12px] font-medium text-slate-400">최대 보증금</p>
+              <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">{finderRequest.maxDeposit?.toLocaleString() || 0} 만원</p>
+            </div>
+          </div>
+          {finderRequest.maxRent > 0 && (
+            <div className="flex items-start gap-2">
+              <CreditCard className="mt-[2px] h-4 w-4 text-blue-400" />
+              <div className="flex-1">
+                <p className="text-[12px] font-medium text-slate-400">최대 월세</p>
+                <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">{finderRequest.maxRent.toLocaleString()} 만원</p>
+              </div>
+            </div>
+          )}
+          {finderRequest.universityName && (
+            <div className="flex items-start gap-2">
+              <School className="mt-[2px] h-4 w-4 text-blue-400" />
+              <div className="flex-1">
+                <p className="text-[12px] font-medium text-slate-400">대학교</p>
+                <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">{finderRequest.universityName}</p>
+              </div>
+            </div>
+          )}
+          {(finderRequest.roomcount || finderRequest.bathroomcount) && (
+            <div className="flex items-start gap-2">
+              <Home className="mt-[2px] h-4 w-4 text-blue-400" />
+              <div className="flex-1">
+                <p className="text-[12px] font-medium text-slate-400">방 구조</p>
+                <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">
+                  {finderRequest.roomcount && `방 ${finderRequest.roomcount}개`}
+                  {finderRequest.roomcount && finderRequest.bathroomcount && ' · '}
+                  {finderRequest.bathroomcount && `욕실 ${finderRequest.bathroomcount}개`}
+                </p>
+              </div>
+            </div>
+          )}
+          {finderRequest.maxBuildingAge && (
+            <div className="flex items-start gap-2">
+              <Home className="mt-[2px] h-4 w-4 text-blue-400" />
+              <div className="flex-1">
+                <p className="text-[12px] font-medium text-slate-400">건물 노후도</p>
+                <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">
+                  {finderRequest.maxBuildingAge === 1 && '5년 이하'}
+                  {finderRequest.maxBuildingAge === 2 && '10년 이하'}
+                  {finderRequest.maxBuildingAge === 3 && '20년 이하'}
+                  {finderRequest.maxBuildingAge === 4 && '30년 이하'}
+                  {finderRequest.maxBuildingAge === 5 && '상관없음'}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* 추가 옵션 */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200">
-        <div className="border-b border-slate-100 bg-slate-50 px-6 py-4">
-          <h3 className="text-lg font-bold text-slate-900">추가 옵션</h3>
+      <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-slate-200">
+        <div className="border-b border-slate-100 bg-white px-6 py-4">
+          <div className="flex items-center gap-2">
+            <Home className="h-4 w-4 text-blue-400" />
+            <h3 className="text-base font-semibold tracking-tight text-slate-900">추가 옵션</h3>
+          </div>
         </div>
         <div className="p-6">
           <div className="flex flex-wrap gap-2">
             {finderRequest.isNear && (
-              <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-                🏫 학교 근처
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1.5 text-xs font-semibold text-blue-700">
+                <School className="h-3.5 w-3.5" />
+                학교 근처
               </span>
             )}
             {finderRequest.airconYn && (
-              <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
-                ❄️ 에어컨
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+                <AirVent className="h-3.5 w-3.5" />
+                에어컨
               </span>
             )}
             {finderRequest.washerYn && (
-              <span className="rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700">
-                🧺 세탁기
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-100 px-3 py-1.5 text-xs font-semibold text-purple-700">
+                <WashingMachine className="h-3.5 w-3.5" />
+                세탁기
               </span>
             )}
             {finderRequest.fridgeYn && (
-              <span className="rounded-full bg-pink-100 px-3 py-1 text-xs font-semibold text-pink-700">
-                🧊 냉장고
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-pink-100 px-3 py-1.5 text-xs font-semibold text-pink-700">
+                <Refrigerator className="h-3.5 w-3.5" />
+                냉장고
               </span>
             )}
             {!finderRequest.isNear && !finderRequest.airconYn && !finderRequest.washerYn && !finderRequest.fridgeYn && (
@@ -200,9 +261,12 @@ export default function OwnerFinderRequestDetailPage({ params }: PageProps) {
 
       {/* 기타 조건 */}
       {finderRequest.additionalCondition && (
-        <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200">
-          <div className="border-b border-slate-100 bg-slate-50 px-6 py-4">
-            <h3 className="text-lg font-bold text-slate-900">기타 요구사항</h3>
+        <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-slate-200">
+          <div className="border-b border-slate-100 bg-white px-6 py-4">
+            <div className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-blue-400" />
+              <h3 className="text-base font-semibold tracking-tight text-slate-900">기타 요구사항</h3>
+            </div>
           </div>
           <div className="p-6">
             <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{finderRequest.additionalCondition}</p>
@@ -211,12 +275,15 @@ export default function OwnerFinderRequestDetailPage({ params }: PageProps) {
       )}
 
       {/* 뒤로가기 버튼 */}
-      <button
-        onClick={() => router.back()}
-        className="rounded-lg border-2 border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
-      >
-        뒤로 가기
-      </button>
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium tracking-tight text-slate-700 transition hover:bg-slate-50 active:scale-[0.98]"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          뒤로 가기
+        </button>
+      </div>
     </main>
   );
 }

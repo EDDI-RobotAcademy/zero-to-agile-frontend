@@ -4,6 +4,26 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getHousePlatformById } from '@/lib/repositories/ownerRepository';
 import { HousePlatform } from '@/types/owner';
+import { ImageGallery } from '@/components/common/ImageGallery';
+import {
+  FileText,
+  MapPin,
+  Building2,
+  Home,
+  Wallet,
+  DollarSign,
+  CreditCard,
+  Wrench,
+  Ruler,
+  Square,
+  Building,
+  Sparkles,
+  Car,
+  ArrowLeft,
+  User,
+  Phone,
+  Lock,
+} from 'lucide-react';
 
 type PageProps = { params: Promise<{ id: string }> };
 
@@ -48,8 +68,8 @@ export default function FinderHouseDetailPage({ params }: PageProps) {
   if (loading) {
     return (
       <main className="space-y-6">
-        <div className="flex min-h-[40vh] items-center justify-center">
-          <p className="text-slate-600">매물을 불러오는 중...</p>
+        <div className="rounded-2xl border border-slate-100 bg-white p-8 text-center">
+          <p className="text-sm text-slate-600">매물 정보를 불러오는 중...</p>
         </div>
       </main>
     );
@@ -58,65 +78,77 @@ export default function FinderHouseDetailPage({ params }: PageProps) {
   if (error || !listing) {
     return (
       <main className="space-y-6">
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 shadow-sm">
-          <p className="text-sm font-medium text-red-700">{error || '매물을 찾을 수 없습니다.'}</p>
+        <div className="rounded-2xl border border-red-100 bg-red-50 p-8 text-center">
+          <p className="text-sm text-red-600">{error || '매물을 찾을 수 없습니다.'}</p>
+          <button
+            onClick={() => router.back()}
+            className="mt-4 rounded-xl px-6 py-3"
+          >
+            목록으로 돌아가기
+          </button>
         </div>
-        <button
-          onClick={() => router.back()}
-          className="rounded-lg border-2 border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-        >
-          뒤로 가기
-        </button>
       </main>
     );
+  }
+
+  // 이미지 URL 파싱
+  let imageUrlsArray: string[] = [];
+  try {
+    if (listing.imageUrls && listing.imageUrls.trim()) {
+      const parsed = JSON.parse(listing.imageUrls);
+      imageUrlsArray = Array.isArray(parsed) ? parsed.filter(url => url && url.trim()) : [];
+    }
+  } catch {
+    // JSON 파싱 실패 시 단일 URL로 처리
+    if (listing.imageUrls && listing.imageUrls.trim()) {
+      imageUrlsArray = [listing.imageUrls];
+    }
   }
 
   return (
     <main className="space-y-6">
       {/* 헤더 */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-100 via-white to-teal-50 px-8 py-8 shadow-lg ring-1 ring-emerald-100">
-        <div className="relative z-10">
-          <div className="mb-3 flex items-center gap-2.5">
-            <div className="rounded-lg bg-emerald-600 p-1.5">
-              <svg className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
+      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 via-white to-blue-50 p-8 shadow-sm ring-1 ring-blue-100">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[12px] font-medium tracking-tight text-blue-500  ml-0.5">매물 상세</p>
+            <h2 className="mb-1.5 text-[26px] font-semibold tracking-[-0.015em] text-slate-900">{listing.title}</h2>
+            <div className="flex gap-1.5">
+              <span className="rounded-full bg-blue-50 px-0.5 py-0.5 text-[12px] font-medium text-blue-600">
+                {listing.salesType}
+              </span>
+              <span
+                className={`rounded-full px-2.5 py-0.5 text-[12px] font-medium ${
+                  listing.isBanned
+                    ? 'bg-red-50 text-red-600'
+                    : 'bg-blue-50 text-blue-600'
+                }`}
+              >
+                {listing.isBanned ? '차단' : '활성'}
+              </span>
             </div>
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">House</span>
           </div>
-          <h1 className="mb-2 text-3xl font-bold text-slate-900">{listing.title}</h1>
-          <p className="text-sm text-slate-600">
-            {listing.address} · {listing.residenceType} · {listing.salesType}
-          </p>
         </div>
-        <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-emerald-200/30 blur-2xl"></div>
-        <div className="absolute -bottom-4 -left-4 h-24 w-24 rounded-full bg-teal-200/30 blur-2xl"></div>
       </div>
 
       {/* 임대인 정보 */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200">
-        <div className="border-b border-slate-100 bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4">
+      <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-slate-200">
+        <div className="border-b border-slate-100 bg-white px-6 py-4">
           <div className="flex items-center gap-2">
-            <div className="rounded-lg bg-purple-600 p-1.5">
-              <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-bold text-slate-900">임대인 정보</h3>
+            <User className="h-4 w-4 text-blue-400" />
+            <h3 className="text-base font-semibold tracking-tight text-slate-900">임대인 정보</h3>
           </div>
         </div>
         <div className="p-6">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">📱</span>
+          <div className="flex items-start gap-2">
+            <Phone className="mt-[2px] h-4 w-4 text-blue-400" />
             <div className="flex-1">
-              <p className="text-xs font-semibold text-slate-500 mb-1">연락처</p>
+              <p className="text-[12px] font-medium text-slate-400">연락처</p>
               {acceptType === 'Y' && listing.phoneNumber ? (
-                <p className="text-base font-semibold text-slate-900">{listing.phoneNumber}</p>
+                <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">{listing.phoneNumber}</p>
               ) : (
-                <div className="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
-                  <svg className="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
+                <div className="mt-2 flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
+                  <Lock className="h-4 w-4 text-amber-600" />
                   <p className="text-sm font-medium text-amber-800">임대인이 컨텍 요청을 수락하면 번호가 공개됩니다.</p>
                 </div>
               )}
@@ -126,85 +158,192 @@ export default function FinderHouseDetailPage({ params }: PageProps) {
       </div>
 
       {/* 이미지 갤러리 */}
-      {(() => {
-        try {
-          const images = JSON.parse(listing.imageUrls || '[]');
-          if (Array.isArray(images) && images.length > 0) {
-            return (
-              <div className="grid gap-3 md:grid-cols-2">
-                {images.map((img, idx) => (
-                  <img
-                    key={idx}
-                    src={img}
-                    alt={`${listing.title} ${idx + 1}`}
-                    className="h-64 w-full rounded-xl object-cover shadow-md ring-1 ring-slate-200"
-                  />
-                ))}
-              </div>
-            );
-          }
-        } catch (e) {
-          console.error('Failed to parse imageUrls', e);
-        }
-        return null;
-      })()}
+      {imageUrlsArray.length > 0 && (
+        <ImageGallery images={imageUrlsArray} alt={listing.title} />
+      )}
 
-      {/* 기본 정보 */}
-      <div className="overflow-hidden rounded-2xl bg-white shadow-md ring-1 ring-slate-200">
-        <div className="border-b border-slate-100 bg-slate-50 px-6 py-4">
-          <h3 className="text-lg font-bold text-slate-900">기본 정보</h3>
-        </div>
-        <div className="p-6">
-          <div className="grid gap-4 text-sm md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* 기본 정보 */}
+        <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-slate-200">
+          <div className="border-b border-slate-100 bg-white px-6 py-4">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-700">💰 보증금:</span>
-              <span className="text-slate-600">{listing.deposit.toLocaleString()} 만원</span>
+              <FileText className="h-4 w-4 text-blue-400" />
+              <h3 className="text-base font-semibold tracking-tight text-slate-900">기본 정보</h3>
             </div>
+          </div>
+
+          <div className="flex flex-col gap-4 p-6">
+            <div className="flex items-start gap-2">
+              <MapPin className="mt-[2px] h-4 w-4 text-blue-400" />
+              <div className="flex-1">
+                <p className="text-[12px] font-medium text-slate-400">주소</p>
+                <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">{listing.address}</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-2">
+              <Building2 className="mt-[2px] h-4 w-4 text-blue-400" />
+              <div className="flex-1">
+                <p className="text-[12px] font-medium text-slate-400">매물 유형</p>
+                <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">
+                  {listing.residenceType}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-2">
+              <Home className="mt-[2px] h-4 w-4 text-blue-400" />
+              <div className="flex-1">
+                <p className="text-[12px] font-medium text-slate-400">방 구조</p>
+                <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">
+                  {listing.roomType}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-2">
+              <FileText className="mt-[2px] h-4 w-4 text-blue-400" />
+              <div className="flex-1">
+                <p className="text-[12px] font-medium text-slate-400">등록번호</p>
+                <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">{listing.rgstNo}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 금액 정보 */}
+        <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-slate-200">
+          <div className="border-b border-slate-100 bg-white px-6 py-4">
+            <div className="flex items-center gap-2">
+              <Wallet className="h-4 w-4 text-blue-400" />
+              <h3 className="text-base font-semibold tracking-tight text-slate-900">
+                금액 정보
+              </h3>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4 p-6">
+            <div className="flex items-start gap-2">
+              <DollarSign className="mt-[2px] h-4 w-4 text-blue-400" />
+              <div className="flex-1">
+                <p className="text-[12px] font-medium text-slate-400">보증금</p>
+                <p className="mt-0.5 text-[18px] font-semibold tracking-tight text-slate-900">
+                  <span className="relative inline-block bg-gradient-to-t from-blue-200/70 to-blue-200/30 px-1 rounded-sm">
+                    {listing.deposit.toLocaleString()}만원
+                  </span>
+                </p>
+              </div>
+            </div>
+
             {listing.monthlyRent > 0 && (
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-slate-700">💸 월세:</span>
-                <span className="text-slate-600">{listing.monthlyRent.toLocaleString()} 만원</span>
+              <div className="flex items-start gap-2">
+                <CreditCard className="mt-[2px] h-4 w-4 text-blue-400" />
+                <div className="flex-1">
+                  <p className="text-[12px] font-medium text-slate-400">월세</p>
+                  <p className="mt-0.5 text-[18px] font-semibold tracking-tight text-slate-900">
+                    <span className="relative inline-block bg-gradient-to-t from-blue-200/70 to-blue-200/30 px-1 rounded-sm">
+                      {listing.monthlyRent.toLocaleString()}만원
+                    </span>
+                  </p>
+                </div>
               </div>
             )}
+
+            {listing.manageCost > 0 && (
+              <div className="flex items-start gap-2">
+                <Wrench className="mt-[2px] h-4 w-4 text-blue-400" />
+                <div className="flex-1">
+                  <p className="text-[12px] font-medium text-slate-400">관리비</p>
+                  <p className="mt-0.5 text-[18px] font-semibold tracking-tight text-slate-900">
+                    <span className="relative inline-block bg-gradient-to-t from-blue-200/70 to-blue-200/30 px-1 rounded-sm">
+                      {listing.manageCost.toLocaleString()}만원
+                    </span>
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 상세 정보 */}
+        <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-slate-200">
+          <div className="border-b border-slate-100 bg-white px-6 py-4">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-700">📏 전용면적:</span>
-              <span className="text-slate-600">{listing.exclusiveArea} m²</span>
+              <Ruler className="h-4 w-4 text-blue-400" />
+              <h3 className="text-base font-semibold tracking-tight text-slate-900">면적 및 층수</h3>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-700">📐 계약면적:</span>
-              <span className="text-slate-600">{listing.contractArea} m²</span>
+          </div>
+
+          <div className="flex flex-col gap-4 p-6">
+            <div className="flex items-start gap-2">
+              <Square className="mt-[2px] h-4 w-4 text-blue-400" />
+              <div className="flex-1">
+                <p className="text-[12px] font-medium text-slate-400">전용면적</p>
+                <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">{listing.exclusiveArea}㎡</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-700">🏢 층수:</span>
-              <span className="text-slate-600">{listing.floorNo}/{listing.allFloors}층</span>
+
+            {listing.contractArea > 0 && (
+              <div className="flex items-start gap-2">
+                <Square className="mt-[2px] h-4 w-4 text-blue-400" />
+                <div className="flex-1">
+                  <p className="text-[12px] font-medium text-slate-400">계약면적</p>
+                  <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">{listing.contractArea}㎡</p>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-start gap-2">
+              <Building className="mt-[2px] h-4 w-4 text-blue-400" />
+              <div className="flex-1">
+                <p className="text-[12px] font-medium text-slate-400">층수</p>
+                <p className="mt-0.5 text-[14px] leading-[1.4] text-slate-700">
+                  {listing.floorNo}층 / 전체 {listing.allFloors}층
+                </p>
+              </div>
             </div>
+          </div>
+        </div>
+
+        {/* 편의시설 */}
+        <div className="overflow-hidden rounded-3xl bg-white ring-1 ring-slate-200">
+          <div className="border-b border-slate-100 bg-white px-6 py-4">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-700">🏠 방 타입:</span>
-              <span className="text-slate-600">{listing.roomType}</span>
+              <Sparkles className="h-4 w-4 text-blue-400" />
+              <h3 className="text-base font-semibold tracking-tight text-slate-900">편의시설</h3>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-700">💵 관리비:</span>
-              <span className="text-slate-600">{listing.manageCost} 만원</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-700">🚗 주차:</span>
-              <span className="text-slate-600">{listing.canPark ? '가능' : '불가능'}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-700">🛗 엘리베이터:</span>
-              <span className="text-slate-600">{listing.hasElevator ? '있음' : '없음'}</span>
+          </div>
+
+          <div className="flex flex-col gap-4 p-6">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <Building2 className={`h-4 w-4 ${listing.hasElevator ? 'text-blue-400' : 'text-slate-300'}`} />
+                <span className={`text-[14px] ${listing.hasElevator ? 'font-medium text-slate-700' : 'text-slate-400'}`}>
+                  엘리베이터
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Car className={`h-4 w-4 ${listing.canPark ? 'text-blue-400' : 'text-slate-300'}`} />
+                <span className={`text-[14px] ${listing.canPark ? 'font-medium text-slate-700' : 'text-slate-400'}`}>
+                  주차 가능
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 뒤로가기 버튼 */}
-      <button
-        onClick={() => router.back()}
-        className="rounded-lg border-2 border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50"
-      >
-        뒤로 가기
-      </button>
+      {/* 하단 버튼 */}
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium tracking-tight text-slate-700 transition hover:bg-slate-50 active:scale-[0.98]"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          목록으로
+        </button>
+      </div>
     </main>
   );
 }
