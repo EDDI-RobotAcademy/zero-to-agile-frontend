@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/common/Button';
+import { useRole } from '@/lib/auth/roleContext';
 import { getOwnerRecommendations } from '@/lib/repositories/ownerRepository';
 import { sendMessage } from '@/lib/repositories/contactRepository';
 import { OwnerRecommendation, HousePlatformSummary } from '@/types/owner';
@@ -17,11 +18,15 @@ import {
 
 export default function OwnerRecommendationsPage() {
   const router = useRouter();
+  const { authFetch } = useRole();
   const [recommendations, setRecommendations] = useState<OwnerRecommendation | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [rentMargin, setRentMargin] = useState(5);
   const [sendingMessage, setSendingMessage] = useState<number | null>(null);
+  const [explainOpenId, setExplainOpenId] = useState<number | null>(null);
+  const [explainLoadingId, setExplainLoadingId] = useState<number | null>(null);
+  const [explainMessages, setExplainMessages] = useState<Record<number, string>>({});
 
   // 메시지 모달 상태
   const [messageModalOpen, setMessageModalOpen] = useState(false);
@@ -85,6 +90,71 @@ export default function OwnerRecommendationsPage() {
       alert(err?.message ?? '컨텍 요청에 실패했습니다.');
     } finally {
       setSendingMessage(null);
+    }
+  };
+
+  const handleExplainClick = async (
+    finderRequestId: number,
+    housePlatform: OwnerRecommendation['results'][number]['housePlatform'],
+    finderRequest: OwnerRecommendation['results'][number]['matchedFinderRequests'][number]
+  ) => {
+    if (explainOpenId === finderRequestId) {
+      setExplainOpenId(null);
+      return;
+    }
+
+    setExplainOpenId(finderRequestId);
+    if (explainMessages[finderRequestId]) return;
+
+    try {
+      setExplainLoadingId(finderRequestId);
+      const res = await authFetch('/explain/owner', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tone: 'formal',
+          owner_house: {
+            house_platform_id: housePlatform.housePlatformId,
+            title: housePlatform.title,
+            address: housePlatform.address,
+            sales_type: housePlatform.salesType,
+            residence_type: housePlatform.residenceType,
+            monthly_rent: housePlatform.monthlyRent,
+            deposit: housePlatform.deposit,
+            room_type: housePlatform.roomType,
+            gu_nm: housePlatform.guNm,
+            dong_nm: housePlatform.dongNm,
+          },
+          finders: {
+            finder_request_id: finderRequest.finderRequestId,
+            abang_user_id: finderRequest.abangUserId,
+            price_type: finderRequest.priceType,
+            house_type: finderRequest.houseType,
+            max_rent: finderRequest.maxRent,
+            preferred_region: finderRequest.preferredRegion,
+          },
+        }),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || '추천 이유를 불러오지 못했습니다.');
+      }
+
+      const data = await res.json();
+      const message =
+        typeof data?.message === 'string'
+          ? data.message
+          : '추천 이유를 불러오지 못했습니다.';
+      setExplainMessages((prev) => ({ ...prev, [finderRequestId]: message }));
+    } catch (err: any) {
+      const message =
+        typeof err?.message === 'string'
+          ? err.message
+          : '추천 이유를 불러오지 못했습니다.';
+      setExplainMessages((prev) => ({ ...prev, [finderRequestId]: message }));
+    } finally {
+      setExplainLoadingId(null);
     }
   };
 
@@ -297,26 +367,52 @@ export default function OwnerRecommendationsPage() {
                               </span>
                             </div>
                           </div>
-                          <div className="flex gap-2">
-                            <Link
-                              href={`/owner/finder-request/${request.finderRequestId}`}
-                              className="inline-flex items-center gap-1.5 rounded-lg border-2 border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
-                            >
-                              의뢰서 보기
-                            </Link>
-                            <button
-                              onClick={() =>
-                                handleOpenMessageModal(
-                                  result.housePlatform.housePlatformId,
-                                  request.finderRequestId
-                                )
-                              }
-                              disabled={sendingMessage === request.finderRequestId}
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-purple-700 hover:shadow-md active:scale-[0.98] disabled:bg-slate-300 disabled:shadow-none"
-                            >
-                              <MessageSquare className="h-3 w-3" />
-                              컨텍하기
-                            </button>
+                          <div className="flex flex-col items-end gap-2">
+                            <div className="flex gap-2">
+                              <Link
+                                href={`/owner/finder-request/${request.finderRequestId}`}
+                                className="inline-flex items-center gap-1.5 rounded-lg border-2 border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+                              >
+                                의뢰서 보기
+                              </Link>
+                              <button
+                                onClick={() =>
+                                  handleOpenMessageModal(
+                                    result.housePlatform.housePlatformId,
+                                    request.finderRequestId
+                                  )
+                                }
+                                disabled={sendingMessage === request.finderRequestId}
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-purple-700 hover:shadow-md active:scale-[0.98] disabled:bg-slate-300 disabled:shadow-none"
+                              >
+                                <MessageSquare className="h-3 w-3" />
+                                컨텍하기
+                              </button>
+                            </div>
+                            <div className="w-full max-w-[280px]">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleExplainClick(
+                                    request.finderRequestId,
+                                    result.housePlatform,
+                                    request
+                                  )
+                                }
+                                disabled={explainLoadingId === request.finderRequestId}
+                                className="inline-flex w-full items-center justify-between rounded-lg border-2 border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-100"
+                              >
+                                왜 추천했나요? ▼
+                              </button>
+                              {explainOpenId === request.finderRequestId && (
+                                <div className="mt-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
+                                  {explainLoadingId === request.finderRequestId
+                                    ? '추천 이유를 불러오는 중입니다.'
+                                    : explainMessages[request.finderRequestId] ??
+                                      '추천 이유를 불러오지 못했습니다.'}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -332,38 +428,48 @@ export default function OwnerRecommendationsPage() {
       {/* 메시지 전송 모달 */}
       {messageModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
-            <div className="mb-4 flex items-center gap-3">
-              <div className="rounded-full bg-purple-100 p-2.5">
-                <MessageSquare className="h-5 w-5 text-purple-600" />
+          <div className="w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl">
+            <div className="border-b border-slate-200 bg-gradient-to-br from-purple-100 via-white to-pink-50 px-6 py-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-slate-900">임차인에게 컨텍하기</h3>
+                <button
+                  onClick={handleCloseMessageModal}
+                  className="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                >
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
-              <h3 className="text-lg font-bold text-slate-900">컨텍 메시지 전송</h3>
             </div>
-            <p className="mb-4 text-sm text-slate-600">
-              임차인에게 보낼 메시지를 작성해주세요.
-            </p>
-            <textarea
-              value={messageContent}
-              onChange={(e) => setMessageContent(e.target.value)}
-              placeholder="메시지를 입력하세요..."
-              rows={6}
-              className="w-full rounded-lg border-2 border-slate-200 p-3 text-sm focus:border-purple-500 focus:outline-none"
-            />
-            <div className="mt-6 flex gap-3">
-              <button
-                onClick={handleCloseMessageModal}
+            <div className="p-6">
+              <p className="mb-4 text-sm text-slate-600">
+                임차인에게 전달할 메시지를 작성해주세요.
+              </p>
+              <textarea
+                value={messageContent}
+                onChange={(e) => setMessageContent(e.target.value)}
+                placeholder="예: 안녕하세요! 귀하의 의뢰서를 보고 연락드립니다. 제 매물이 조건에 맞을 것 같아 제안드립니다."
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100"
+                rows={5}
                 disabled={!!sendingMessage}
-                className="flex-1 rounded-xl border-2 border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 active:scale-[0.98] disabled:opacity-50"
-              >
-                취소
-              </button>
-              <button
-                onClick={handleSendMessage}
-                disabled={!!sendingMessage}
-                className="flex-1 rounded-xl bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-700 hover:shadow-md active:scale-[0.98] disabled:bg-slate-400 disabled:shadow-none"
-              >
-                {sendingMessage ? '전송 중...' : '보내기'}
-              </button>
+              />
+              <div className="mt-4 flex gap-2">
+                <button
+                  onClick={handleCloseMessageModal}
+                  className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 active:scale-[0.98]"
+                  disabled={!!sendingMessage}
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleSendMessage}
+                  className="flex-1 rounded-xl bg-purple-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-purple-700 active:scale-[0.98] disabled:bg-slate-300"
+                  disabled={!!sendingMessage}
+                >
+                  {sendingMessage ? '전송 중...' : '전송하기'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

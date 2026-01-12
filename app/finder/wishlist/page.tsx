@@ -5,13 +5,15 @@ import { useRouter } from 'next/navigation';
 import { listWishlist, removeFromWishlist } from '@/lib/repositories/wishlistRepository';
 import { WishlistItem } from '@/types/wishlist';
 import { Button } from '@/components/common/Button';
+import { ResidenceType } from '@/types/owner';
 
-const ROOM_TYPE_LABEL: Record<string, string> = {
-  '아파트': '아파트',
+const RESIDENCE_TYPE_LABEL: Record<ResidenceType, string> = {
+  '원룸': '원룸',
+  '투룸': '투룸',
+  '쓰리룸': '쓰리룸',
   '오피스텔': '오피스텔',
+  '아파트': '아파트',
   '빌라': '빌라',
-  '단독주택': '단독주택',
-  '상가': '상가',
 };
 
 export default function WishlistPage() {
@@ -137,7 +139,7 @@ export default function WishlistPage() {
                     {item.salesType}
                   </span>
                   <span className="rounded-lg bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
-                    {ROOM_TYPE_LABEL[item.roomType] || item.roomType}
+                    {RESIDENCE_TYPE_LABEL[item.roomType as ResidenceType] || item.roomType}
                   </span>
                 </div>
 

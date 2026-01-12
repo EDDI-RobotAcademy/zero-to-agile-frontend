@@ -55,7 +55,7 @@ export const finderRequestListMock: FinderRequest[] = [
     maxDeposit: 5000,
     maxRent: 50,
     status: "Y",
-    houseType: "단독주택/다가구주택",
+    houseType: "아파트",
     additionalCondition: "조용한 동네 선호",
     universityName: "연세대학교",
     roomcount: "1",

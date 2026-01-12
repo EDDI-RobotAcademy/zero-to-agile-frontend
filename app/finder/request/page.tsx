@@ -8,6 +8,7 @@ import { useRole } from '@/lib/auth/roleContext';
 
 import {
   getFinderRequests,
+  deleteFinderRequest,
 } from '@/lib/repositories/finderRepository';
 
 import { FinderRequest } from '@/types/finder';
@@ -16,6 +17,8 @@ import {
   MapPin,
   Home,
   Wallet,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 
 
@@ -49,16 +52,18 @@ export default function FinderRequestPage() {
     })();
   }, [isReady, isAuthenticated, router]);
 
-  // 이건 상세조회로
-  const handleDelete = async () => {
-    // if (!request) return;
-    // if (!window.confirm('의뢰서를 삭제하시겠습니까?')) return;
-    // try {
-    //   await deleteFinderRequest(request.id);
-    //   setRequest(null);
-    // } catch (err: any) {
-    //   setError(err?.message ?? '삭제에 실패했습니다.');
-    // }
+  const handleDelete = async (id: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm('정말 이 의뢰서를 삭제하시겠습니까?')) return;
+
+    try {
+      await deleteFinderRequest(id);
+      setRequests(requests.filter(r => r.finderRequestId !== id));
+      alert('의뢰서가 삭제되었습니다.');
+    } catch (error) {
+      console.error('의뢰서 삭제 실패:', error);
+      alert('의뢰서 삭제에 실패했습니다.');
+    }
   };
  return (
     <main className="space-y-6">
@@ -200,6 +205,28 @@ export default function FinderRequestPage() {
                           ` · 월세 ${Number(request.maxRent ?? 0).toLocaleString()}만원`}
                       </p>
                     </div>
+                  </div>
+
+                  {/* 액션 버튼 */}
+                  <div className="mt-auto flex justify-end gap-5 pt-3">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/finder/request/${request.finderRequestId}/edit`);
+                      }}
+                      className="flex items-center gap-1.5 text-[13px] font-medium text-slate-400 transition hover:text-blue-600"
+                    >
+                      <Pencil className="h-4 w-4" />
+                      수정
+                    </button>
+
+                    <button
+                      onClick={(e) => handleDelete(request.finderRequestId, e)}
+                      className="flex items-center gap-1.5 text-[13px] font-medium text-slate-300 transition hover:text-red-500"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      삭제
+                    </button>
                   </div>
                 </div>
               </div>

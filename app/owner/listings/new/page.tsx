@@ -270,6 +270,7 @@ export default function OwnerNewListingPage() {
               <div className="flex items-center gap-2">
                 <input
                   type="number"
+                  min={0}
                   className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100"
                   value={form.deposit || ''}
                   onChange={(e) => setForm({ ...form, deposit: Number(e.target.value) })}
@@ -288,6 +289,7 @@ export default function OwnerNewListingPage() {
                 <div className="flex items-center gap-2">
                   <input
                     type="number"
+                    min={0}
                     className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100"
                     value={form.monthlyRent || ''}
                     onChange={(e) => setForm({ ...form, monthlyRent: Number(e.target.value) })}
@@ -305,6 +307,7 @@ export default function OwnerNewListingPage() {
               <div className="flex items-center gap-2">
                 <input
                   type="number"
+                  min={0}
                   className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100"
                   value={form.manageCost || ''}
                   onChange={(e) => setForm({ ...form, manageCost: Number(e.target.value) })}
@@ -337,6 +340,7 @@ export default function OwnerNewListingPage() {
               <div className="flex items-center gap-2">
                 <input
                   type="number"
+                  min={0}
                   className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100"
                   value={form.exclusiveArea || ''}
                   onChange={(e) => setForm({ ...form, exclusiveArea: Number(e.target.value) })}
@@ -354,6 +358,7 @@ export default function OwnerNewListingPage() {
               <div className="flex items-center gap-2">
                 <input
                   type="number"
+                  min={0}
                   className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100"
                   value={form.contractArea || ''}
                   onChange={(e) => setForm({ ...form, contractArea: Number(e.target.value) })}
@@ -370,6 +375,7 @@ export default function OwnerNewListingPage() {
               <div className="flex items-center gap-2">
                 <input
                   type="number"
+                  min={0}
                   className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100"
                   value={form.floorNo || ''}
                   onChange={(e) => setForm({ ...form, floorNo: Number(e.target.value) })}
@@ -386,6 +392,7 @@ export default function OwnerNewListingPage() {
               <div className="flex items-center gap-2">
                 <input
                   type="number"
+                  min={0}
                   className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100"
                   value={form.allFloors || ''}
                   onChange={(e) => setForm({ ...form, allFloors: Number(e.target.value) })}

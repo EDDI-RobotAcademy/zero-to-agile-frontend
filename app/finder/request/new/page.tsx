@@ -14,6 +14,17 @@ import {
   HOUSE_TYPES,
   PRICE_TYPES,
 } from '@/types/houseOptions';
+import {
+  FileText,
+  MapPin,
+  Home,
+  Wallet,
+  School,
+  DoorOpen,
+  Zap,
+  Building2,
+  MessageSquare,
+} from 'lucide-react';
 
 export default function FinderRequestNewPage() {
   const router = useRouter();
@@ -98,21 +109,25 @@ export default function FinderRequestNewPage() {
   return (
     <main className="space-y-6">
       {/* 헤더 */}
-      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 via-white to-blue-50 p-8 shadow-sm ring-1 ring-slate-100">
-        <div className="space-y-1">
-          <p className="text-sm font-semibold text-sky-700">의뢰서 작성</p>
-          <h2 className="text-3xl font-bold text-slate-900">
-            새 매물 의뢰서
-          </h2>
-          <p className="text-sm text-slate-600">
-            원하시는 매물 조건을 입력하면 AI가 추천해드려요.
-          </p>
+      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 via-white to-blue-50 p-8 shadow-sm ring-1 ring-blue-100">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[12px] font-medium tracking-tight text-blue-500 ml-0.5">
+              의뢰서 작성
+            </p>
+            <h2 className="text-[26px] font-semibold tracking-[-0.015em] mb-1 text-slate-900">
+              새 매물 의뢰서
+            </h2>
+            <p className="text-sm tracking-[-0.005em] leading-relaxed text-slate-500">
+              원하시는 매물 조건을 입력하여 의뢰서를 작성해보세요.
+            </p>
+          </div>
         </div>
       </div>
 
       {/* 에러 */}
       {error && (
-        <div className="rounded-2xl border border-red-100 bg-red-50 p-4">
+        <div className="overflow-hidden rounded-3xl border border-red-100 bg-red-50 p-4 ring-1 ring-red-100">
           <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
@@ -121,10 +136,10 @@ export default function FinderRequestNewPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* 섹션 A: 핵심 정보 */}
         <div className="overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-slate-200">
-          <div className="border-b border-slate-100 bg-slate-50 px-6 py-4">
+          <div className="border-b border-slate-100 bg-white px-6 py-4">
             <div className="flex items-center gap-2">
-              <span className="text-lg">📋</span>
-              <h3 className="text-lg font-bold text-slate-900">핵심 정보</h3>
+              <FileText className="h-4 w-4 text-blue-400" />
+              <h3 className="text-base font-semibold tracking-tight text-slate-900">핵심 정보</h3>
             </div>
           </div>
 
@@ -132,7 +147,7 @@ export default function FinderRequestNewPage() {
             {/* 희망 지역 - 구/동 선택 */}
             <div className="block space-y-2">
               <div className="flex items-center gap-2">
-                <span className="text-base">🗺️</span>
+                <MapPin className="h-4 w-4 text-blue-400" />
                 <span className="text-sm font-semibold text-slate-700">
                   희망 지역
                 </span>
@@ -151,7 +166,7 @@ export default function FinderRequestNewPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">🏠</span>
+                  <Home className="h-4 w-4 text-blue-400" />
                   <span className="text-sm font-semibold text-slate-700">
                     부동산 유형
                   </span>
@@ -179,7 +194,7 @@ export default function FinderRequestNewPage() {
 
               <label className="block space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">📄</span>
+                  <FileText className="h-4 w-4 text-blue-400" />
                   <span className="text-sm font-semibold text-slate-700">
                     임대 유형
                   </span>
@@ -209,7 +224,7 @@ export default function FinderRequestNewPage() {
             {/* 금액 정보 */}
             <div className="space-y-4 border-t border-slate-100 pt-6">
               <div className="flex items-center gap-2">
-                <span className="text-base">💰</span>
+                <Wallet className="h-4 w-4 text-blue-400" />
                 <span className="text-sm font-semibold text-slate-700">금액 정보</span>
               </div>
 
@@ -222,8 +237,9 @@ export default function FinderRequestNewPage() {
                     <span className="text-xs text-red-500">*</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <input
-                      type="number"
+                <input
+                  type="number"
+                  min={0}
                       className="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm shadow-sm transition focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
                       value={form.maxDeposit || ''}
                       onChange={(e) => setForm({ ...form, maxDeposit: Number(e.target.value) })}
@@ -243,8 +259,9 @@ export default function FinderRequestNewPage() {
                       최대 월세
                     </span>
                     <div className="flex items-center gap-2">
-                      <input
-                        type="number"
+                <input
+                  type="number"
+                  min={0}
                         className="flex-1 rounded-xl border border-slate-200 px-4 py-3 text-sm shadow-sm transition focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
                         value={form.maxRent || ''}
                         onChange={(e) => setForm({ ...form, maxRent: Number(e.target.value) })}
@@ -264,10 +281,10 @@ export default function FinderRequestNewPage() {
 
         {/* 섹션 B: 상세 정보 */}
         <div className="overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-slate-200">
-          <div className="border-b border-slate-100 bg-slate-50 px-6 py-4">
+          <div className="border-b border-slate-100 bg-white px-6 py-4">
             <div className="flex items-center gap-2">
-              <span className="text-lg">📌</span>
-              <h3 className="text-lg font-bold text-slate-900">상세 정보</h3>
+              <FileText className="h-4 w-4 text-blue-400" />
+              <h3 className="text-base font-semibold tracking-tight text-slate-900">상세 정보</h3>
             </div>
           </div>
 
@@ -275,7 +292,7 @@ export default function FinderRequestNewPage() {
             {/* 학교 정보 */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <span className="text-base">🏫</span>
+                <School className="h-4 w-4 text-blue-400" />
                 <span className="text-sm font-semibold text-slate-700">학교 정보</span>
               </div>
 
@@ -295,7 +312,7 @@ export default function FinderRequestNewPage() {
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <input
                     type="checkbox"
-                    className="h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer transition"
+                    className="h-5 w-5 rounded border-slate-300 accent-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer transition"
                     checked={form.isNear}
                     onChange={(e) => setForm({ ...form, isNear: e.target.checked })}
                   />
@@ -309,7 +326,7 @@ export default function FinderRequestNewPage() {
             {/* 방 구조 정보 */}
             <div className="space-y-4 border-t border-slate-100 pt-6">
               <div className="flex items-center gap-2">
-                <span className="text-base">🚪</span>
+                <DoorOpen className="h-4 w-4 text-blue-400" />
                 <span className="text-sm font-semibold text-slate-700">방 구조</span>
               </div>
 
@@ -345,7 +362,7 @@ export default function FinderRequestNewPage() {
             {/* 가전제품 옵션 - 구분선 */}
             <div className="space-y-4 border-t border-slate-100 pt-6">
               <div className="flex items-center gap-2">
-                <span className="text-base">⚡</span>
+                <Zap className="h-4 w-4 text-blue-400" />
                 <span className="text-sm font-semibold text-slate-700">가전제품 옵션</span>
               </div>
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
@@ -353,7 +370,7 @@ export default function FinderRequestNewPage() {
                   <label className="flex items-center gap-3 cursor-pointer group">
                     <input
                       type="checkbox"
-                      className="h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer transition"
+                      className="h-5 w-5 rounded border-slate-300 accent-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer transition"
                       checked={form.airconYn === 'Y'}
                       onChange={(e) => setForm({ ...form, airconYn: e.target.checked ? 'Y' : 'N' })}
                     />
@@ -364,7 +381,7 @@ export default function FinderRequestNewPage() {
                   <label className="flex items-center gap-3 cursor-pointer group">
                     <input
                       type="checkbox"
-                      className="h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer transition"
+                      className="h-5 w-5 rounded border-slate-300 accent-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer transition"
                       checked={form.washerYn === 'Y'}
                       onChange={(e) => setForm({ ...form, washerYn: e.target.checked ? 'Y' : 'N' })}
                     />
@@ -375,7 +392,7 @@ export default function FinderRequestNewPage() {
                   <label className="flex items-center gap-3 cursor-pointer group">
                     <input
                       type="checkbox"
-                      className="h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer transition"
+                      className="h-5 w-5 rounded border-slate-300 accent-blue-600 focus:ring-2 focus:ring-blue-100 cursor-pointer transition"
                       checked={form.fridgeYn === 'Y'}
                       onChange={(e) => setForm({ ...form, fridgeYn: e.target.checked ? 'Y' : 'N' })}
                     />
@@ -391,7 +408,7 @@ export default function FinderRequestNewPage() {
             <div className="space-y-4 border-t border-slate-100 pt-6">
               <label className="block space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">🏗️</span>
+                  <Building2 className="h-4 w-4 text-blue-400" />
                   <span className="text-sm font-semibold text-slate-700">건물 노후도</span>
                   <span className="text-xs text-red-500">*</span>
                 </div>
@@ -421,7 +438,7 @@ export default function FinderRequestNewPage() {
             <div className="space-y-4 border-t border-slate-100 pt-6">
               <label className="block space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">💬</span>
+                  <MessageSquare className="h-4 w-4 text-blue-400" />
                   <span className="text-sm font-semibold text-slate-700">추가 조건</span>
                 </div>
                 <textarea

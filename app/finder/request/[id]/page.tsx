@@ -142,17 +142,12 @@ export default function FinderRequestDetailPage() {
           {/* CTA 버튼 영역 - 핵심 액션 */}
           <button
             onClick={() => router.push(`/finder/recommendations?requestId=${requestId}`)}
-            className="group w-full overflow-hidden rounded-3xl bg-gradient-to-r from-blue-500 to-sky-400 px-8 py-5 text-center shadow-xl ring-1 ring-blue-400 transition hover:-translate-y-1 hover:shadow-2xl"
+            className="group relative w-full overflow-hidden rounded-3xl bg-white/70 px-8 py-5 text-center ring-1 ring-blue-200 backdrop-blur transition hover:bg-white/90"
           >
-            <div className="flex items-center justify-center gap-3">
-              <span className="text-xl transition group-hover:scale-110">
-                🏠
-              </span>
-              <span className="text-base font-bold text-white">
+            <div className="flex items-center justify-center gap-2">
+              <Sparkles className="h-5 w-5 text-blue-500" />
+              <span className="text-base font-semibold text-blue-700">
                 이 의뢰서로 매물 추천 받기
-              </span>
-              <span className="text-lg text-white opacity-80 transition group-hover:translate-x-1">
-                →
               </span>
             </div>
           </button>
