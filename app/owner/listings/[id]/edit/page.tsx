@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/common/Button';
 import { getHousePlatformById, updateHousePlatform } from '@/lib/repositories/ownerRepository';
 import { AddressAutocompleteInput } from '@/components/common/AddressAutocompleteInput';
-import { SALES_TYPES, RESIDENCE_TYPES, ROOM_TYPES, HousePlatformEditFormState } from '@/types/owner';
+import { SALES_TYPES, RESIDENCE_TYPES, ROOM_TYPES, HousePlatformEditFormState, ResidenceType, SalesType, RoomType } from '@/types/owner';
+import { Building2, Car } from 'lucide-react';
 
 type PageProps = { params: Promise<{ id: string }> };
 
@@ -164,7 +165,7 @@ export default function OwnerEditListingPage({ params }: PageProps) {
   if (dataLoading) {
     return (
       <main className="space-y-6">
-        <div className="rounded-2xl border border-slate-100 bg-white p-8 text-center">
+        <div className="rounded-3xl border border-slate-100 bg-white p-8 text-center">
           <p className="text-sm text-slate-600">매물을 불러오는 중...</p>
         </div>
       </main>
@@ -174,7 +175,7 @@ export default function OwnerEditListingPage({ params }: PageProps) {
   if (error && !form.title) {
     return (
       <main className="space-y-6">
-        <div className="rounded-2xl border border-red-100 bg-red-50 p-8 text-center">
+        <div className="rounded-3xl border border-red-100 bg-red-50 p-8 text-center">
           <p className="text-sm text-red-600">{error}</p>
           <Button onClick={() => router.push('/owner/listings')} className="mt-4">
             목록으로
@@ -187,31 +188,42 @@ export default function OwnerEditListingPage({ params }: PageProps) {
   return (
     <main className="space-y-6">
       {/* 헤더 */}
-      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-100 via-white to-green-50 p-8 shadow-sm ring-1 ring-slate-100">
-        <div className="space-y-1">
-          <p className="text-sm font-semibold text-emerald-700">매물 수정</p>
-          <h2 className="text-3xl font-bold text-slate-900">
-            매물 정보 수정
-          </h2>
-          <p className="text-sm text-slate-600">
-            등록된 매물 정보를 수정하세요.
-          </p>
+      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 via-white to-blue-50 p-8 shadow-sm ring-1 ring-blue-100">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[12px] font-medium tracking-tight text-blue-500 ml-0.5">
+              매물 수정
+            </p>
+            <h2 className="text-[26px] font-semibold tracking-[-0.015em] mb-1 text-slate-900">
+              매물 정보 수정
+            </h2>
+            <p className="text-sm tracking-[-0.005em] leading-relaxed text-slate-500">
+              등록된 매물 정보를 수정하세요.
+            </p>
+          </div>
         </div>
       </div>
 
       {/* 에러 */}
       {error && (
-        <div className="rounded-2xl border border-red-100 bg-red-50 p-4">
+        <div className="rounded-3xl border border-red-100 bg-red-50 p-4">
           <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {/* 기본 정보 */}
-        <div className="overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-slate-200">
-          <div className="border-b border-slate-100 bg-gradient-to-r from-emerald-50 to-green-50 px-6 py-4">
-            <h3 className="text-lg font-bold text-slate-900">기본 정보</h3>
-            <p className="mt-1 text-xs text-slate-600">매물의 기본 정보를 수정하세요</p>
+        <div className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200">
+          <div className="border-b border-slate-100 bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4">
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500">
+                <span className="text-sm font-bold text-white">1</span>
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">기본 정보</h3>
+                <p className="text-xs text-slate-500">매물의 기본 정보를 수정하세요</p>
+              </div>
+            </div>
           </div>
           <div className="space-y-6 p-6">
             <div>
@@ -220,7 +232,7 @@ export default function OwnerEditListingPage({ params }: PageProps) {
               </label>
               <input
                 type="text"
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
                 placeholder="예) 마포구 신축 원룸, 풀옵션"
@@ -246,7 +258,7 @@ export default function OwnerEditListingPage({ params }: PageProps) {
               </label>
               <input
                 type="text"
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                 value={detailAddress}
                 onChange={(e) => setDetailAddress(e.target.value)}
                 placeholder="예) 00아파트 000동 000호"
@@ -260,9 +272,11 @@ export default function OwnerEditListingPage({ params }: PageProps) {
                   매물 유형 <span className="text-red-500">*</span>
                 </label>
                 <select
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                   value={form.residenceType}
-                  onChange={(e) => setForm({ ...form, residenceType: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, residenceType: e.target.value as ResidenceType })
+                  }
                 >
                   {RESIDENCE_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
@@ -273,9 +287,9 @@ export default function OwnerEditListingPage({ params }: PageProps) {
                   거래 유형 <span className="text-red-500">*</span>
                 </label>
                 <select
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                  className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                   value={form.salesType}
-                  onChange={(e) => setForm({ ...form, salesType: e.target.value })}
+                  onChange={(e) => setForm({ ...form, salesType: e.target.value as SalesType})}
                 >
                   {SALES_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
@@ -285,10 +299,17 @@ export default function OwnerEditListingPage({ params }: PageProps) {
         </div>
 
         {/* 가격 정보 */}
-        <div className="overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-slate-200">
-          <div className="border-b border-slate-100 bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4">
-            <h3 className="text-lg font-bold text-slate-900">가격 정보</h3>
-            <p className="mt-1 text-xs text-slate-600">보증금, 월세, 관리비를 입력하세요</p>
+        <div className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200">
+          <div className="border-b border-slate-100 bg-gradient-to-r from-sky-50 to-sky-100 px-6 py-4">
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-500">
+                <span className="text-sm font-bold text-white">2</span>
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">가격 정보</h3>
+                <p className="text-xs text-slate-500">보증금, 월세, 관리비를 입력하세요</p>
+              </div>
+            </div>
           </div>
           <div className="grid gap-6 p-6 sm:grid-cols-2">
             <div>
@@ -298,7 +319,8 @@ export default function OwnerEditListingPage({ params }: PageProps) {
               <div className="flex items-center gap-2">
                 <input
                   type="number"
-                  className="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                  min={0}
+                  className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100"
                   value={form.deposit || ''}
                   onChange={(e) => setForm({ ...form, deposit: Number(e.target.value) })}
                   placeholder="0"
@@ -316,7 +338,8 @@ export default function OwnerEditListingPage({ params }: PageProps) {
                 <div className="flex items-center gap-2">
                   <input
                     type="number"
-                    className="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                    min={0}
+                    className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100"
                     value={form.monthlyRent || ''}
                     onChange={(e) => setForm({ ...form, monthlyRent: Number(e.target.value) })}
                     placeholder="0"
@@ -333,22 +356,30 @@ export default function OwnerEditListingPage({ params }: PageProps) {
               <div className="flex items-center gap-2">
                 <input
                   type="number"
-                  className="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                  min={0}
+                  className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-violet-400 focus:outline-none focus:ring-2 focus:ring-violet-100"
                   value={form.manageCost || ''}
                   onChange={(e) => setForm({ ...form, manageCost: Number(e.target.value) })}
                   placeholder="0"
                 />
-                <span className="text-sm font-medium text-slate-600">원</span>
+                <span className="text-sm font-medium text-slate-600">만원</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* 면적 및 층수 */}
-        <div className="overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-slate-200">
-          <div className="border-b border-slate-100 bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-4">
-            <h3 className="text-lg font-bold text-slate-900">면적 및 층수</h3>
-            <p className="mt-1 text-xs text-slate-600">매물의 면적과 위치 정보를 입력하세요</p>
+        <div className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200">
+          <div className="border-b border-slate-100 bg-gradient-to-r from-indigo-50 to-indigo-100 px-6 py-4">
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-500">
+                <span className="text-sm font-bold text-white">3</span>
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">면적 및 층수</h3>
+                <p className="text-xs text-slate-500">매물의 면적과 위치 정보를 입력하세요</p>
+              </div>
+            </div>
           </div>
           <div className="grid gap-6 p-6 sm:grid-cols-2">
             <div>
@@ -358,7 +389,8 @@ export default function OwnerEditListingPage({ params }: PageProps) {
               <div className="flex items-center gap-2">
                 <input
                   type="number"
-                  className="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                  min={0}
+                  className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100"
                   value={form.exclusiveArea || ''}
                   onChange={(e) => setForm({ ...form, exclusiveArea: Number(e.target.value) })}
                   placeholder="0"
@@ -375,7 +407,8 @@ export default function OwnerEditListingPage({ params }: PageProps) {
               <div className="flex items-center gap-2">
                 <input
                   type="number"
-                  className="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                  min={0}
+                  className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100"
                   value={form.contractArea || ''}
                   onChange={(e) => setForm({ ...form, contractArea: Number(e.target.value) })}
                   placeholder="0"
@@ -391,7 +424,8 @@ export default function OwnerEditListingPage({ params }: PageProps) {
               <div className="flex items-center gap-2">
                 <input
                   type="number"
-                  className="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                  min={0}
+                  className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100"
                   value={form.floorNo || ''}
                   onChange={(e) => setForm({ ...form, floorNo: Number(e.target.value) })}
                   placeholder="0"
@@ -407,7 +441,8 @@ export default function OwnerEditListingPage({ params }: PageProps) {
               <div className="flex items-center gap-2">
                 <input
                   type="number"
-                  className="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                  min={0}
+                  className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100"
                   value={form.allFloors || ''}
                   onChange={(e) => setForm({ ...form, allFloors: Number(e.target.value) })}
                   placeholder="0"
@@ -419,10 +454,17 @@ export default function OwnerEditListingPage({ params }: PageProps) {
         </div>
 
         {/* 추가 정보 */}
-        <div className="overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-slate-200">
-          <div className="border-b border-slate-100 bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4">
-            <h3 className="text-lg font-bold text-slate-900">추가 정보</h3>
-            <p className="mt-1 text-xs text-slate-600">방 구조 및 편의시설을 선택하세요</p>
+        <div className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200">
+          <div className="border-b border-slate-100 bg-gradient-to-r from-violet-50 to-violet-100 px-6 py-4">
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-500">
+                <span className="text-sm font-bold text-white">4</span>
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">추가 정보</h3>
+                <p className="text-xs text-slate-500">방 구조 및 편의시설을 선택하세요</p>
+              </div>
+            </div>
           </div>
           <div className="space-y-6 p-6">
             <div>
@@ -430,9 +472,9 @@ export default function OwnerEditListingPage({ params }: PageProps) {
                 방 구조
               </label>
               <select
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100 sm:w-1/2"
+                className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-fuchsia-400 focus:outline-none focus:ring-2 focus:ring-fuchsia-100 sm:w-1/2"
                 value={form.roomType}
-                onChange={(e) => setForm({ ...form, roomType: e.target.value })}
+                onChange={(e) => setForm({ ...form, roomType: e.target.value as RoomType})}
               >
                 {ROOM_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
@@ -442,23 +484,25 @@ export default function OwnerEditListingPage({ params }: PageProps) {
               <label className="mb-3 block text-sm font-semibold text-slate-700">
                 편의시설
               </label>
-              <div className="flex flex-wrap gap-4">
-                <label className="flex cursor-pointer items-center gap-3 rounded-xl border-2 border-slate-200 bg-slate-50 px-5 py-3 transition hover:border-emerald-300 hover:bg-emerald-50">
+              <div className="flex flex-wrap gap-3">
+                <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border-2 border-slate-200 bg-white px-4 py-2.5 transition hover:border-violet-300 hover:bg-violet-50">
                   <input
                     type="checkbox"
-                    className="h-5 w-5 rounded border-slate-300 text-emerald-600 transition focus:ring-2 focus:ring-emerald-200"
+                    className="h-4 w-4 rounded border-slate-300 text-violet-600 transition focus:ring-2 focus:ring-violet-200"
                     checked={form.hasElevator}
                     onChange={(e) => setForm({ ...form, hasElevator: e.target.checked })}
                   />
+                  <Building2 className="h-4 w-4 text-violet-400" />
                   <span className="text-sm font-medium text-slate-700">엘리베이터</span>
                 </label>
-                <label className="flex cursor-pointer items-center gap-3 rounded-xl border-2 border-slate-200 bg-slate-50 px-5 py-3 transition hover:border-emerald-300 hover:bg-emerald-50">
+                <label className="flex cursor-pointer items-center gap-2.5 rounded-lg border-2 border-slate-200 bg-white px-4 py-2.5 transition hover:border-violet-300 hover:bg-violet-50">
                   <input
                     type="checkbox"
-                    className="h-5 w-5 rounded border-slate-300 text-emerald-600 transition focus:ring-2 focus:ring-emerald-200"
+                    className="h-4 w-4 rounded border-slate-300 text-violet-600 transition focus:ring-2 focus:ring-violet-200"
                     checked={form.canPark}
                     onChange={(e) => setForm({ ...form, canPark: e.target.checked })}
                   />
+                  <Car className="h-4 w-4 text-violet-400" />
                   <span className="text-sm font-medium text-slate-700">주차 가능</span>
                 </label>
               </div>
@@ -467,10 +511,17 @@ export default function OwnerEditListingPage({ params }: PageProps) {
         </div>
 
         {/* 이미지 */}
-        <div className="overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-slate-200">
-          <div className="border-b border-slate-100 bg-gradient-to-r from-rose-50 to-pink-50 px-6 py-4">
-            <h3 className="text-lg font-bold text-slate-900">이미지</h3>
-            <p className="mt-1 text-xs text-slate-600">매물 이미지 URL을 추가하세요</p>
+        <div className="overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-slate-200">
+          <div className="border-b border-slate-100 bg-gradient-to-r from-purple-50 to-purple-100 px-6 py-4">
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-500">
+                <span className="text-sm font-bold text-white">5</span>
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">이미지</h3>
+                <p className="text-xs text-slate-500">매물 이미지 URL을 추가하세요</p>
+              </div>
+            </div>
           </div>
           <div className="space-y-4 p-6">
             <div className="flex items-center justify-between">
@@ -478,9 +529,11 @@ export default function OwnerEditListingPage({ params }: PageProps) {
               <button
                 type="button"
                 onClick={handleAddImageUrl}
-                className="flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600"
+                className="flex items-center gap-1.5 rounded-lg bg-purple-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-purple-600"
               >
-                <span>+</span>
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
                 <span>URL 추가</span>
               </button>
             </div>
@@ -492,7 +545,7 @@ export default function OwnerEditListingPage({ params }: PageProps) {
                   </div>
                   <input
                     type="text"
-                    className="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm transition focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                    className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-pink-400 focus:outline-none focus:ring-2 focus:ring-pink-100"
                     value={url}
                     onChange={(e) => handleImageUrlChange(index, e.target.value)}
                     placeholder="https://example.com/image.jpg"
@@ -516,12 +569,22 @@ export default function OwnerEditListingPage({ params }: PageProps) {
           </div>
         </div>
 
-        <div className="flex justify-end gap-3">
-          <Button type="button" variant="secondary" onClick={() => router.push('/owner/listings')} disabled={loading}>
+        <div className="flex justify-end gap-3 pt-2">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => router.push('/owner/listings')}
+            disabled={loading}
+            className="rounded-lg px-6 py-2.5"
+          >
             취소
           </Button>
-          <Button type="submit" disabled={loading}>
-            {loading ? '수정 중...' : '변경사항 저장'}
+          <Button
+            type="submit"
+            disabled={loading}
+            className="rounded-lg px-8 py-2.5"
+          >
+            {loading ? '수정 중...' : '매물 수정'}
           </Button>
         </div>
       </form>

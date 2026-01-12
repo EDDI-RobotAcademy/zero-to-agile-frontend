@@ -28,7 +28,7 @@ export const housePlatformMock: HousePlatform = {
   ]),
   pnuCd: '1144011500101430008',
   isBanned: false,
-  residenceType: '원룸', // 단독주택 → 원룸
+  residenceType: '원룸', 
   guNm: '마포구',
   dongNm: '상수동',
   registeredAt: '2003-07-05T00:00:00Z',

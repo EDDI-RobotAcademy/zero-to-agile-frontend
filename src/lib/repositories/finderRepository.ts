@@ -2,6 +2,7 @@ import {
   FinderRequest,
   FinderRequestCreatePayload,
   FinderRequestUpdatePayload,
+  RecommendationReport,
 } from '@/types/finder';
 import { userStore } from '../auth/userStore';
 import { USE_MOCK } from '@/config/env';
@@ -9,6 +10,7 @@ import {
   finderRequestMock,
   finderRequestListMock,
 } from '@/mocks/finder/finderRequest.mock';
+import { finderRecommendationsReportMock } from '@/mocks/finder/recommendationsReport.mock';
 
 /**
  * 임차인 요구서 생성
@@ -210,6 +212,62 @@ export async function getUniversityNames(): Promise<string[]> {
 
   const data = await res.json();
   return data.universities || [];
+}
+
+/**
+ * 매물 추천 시작
+ * POST /api/search_house
+ */
+export async function startRecommendation(
+  finderRequestId: number
+): Promise<{ search_house_id: string }> {
+  if (USE_MOCK) {
+    return { search_house_id: 'mock-search-id' };
+  }
+
+  const res = await fetch('/api/search_house', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ finder_request_id: finderRequestId }),
+  });
+
+  if (!res.ok) throw new Error('추천 요청에 실패했습니다.');
+
+  const data = await res.json();
+  const { search_house_id } = data;
+
+  if (!search_house_id) throw new Error('search_house_id를 받지 못했습니다.');
+
+  return { search_house_id };
+}
+
+/**
+ * 매물 추천 상태 조회 (폴링용)
+ * GET /api/search_house/${searchHouseId}
+ */
+export async function getRecommendationStatus(
+  searchHouseId: string
+): Promise<{
+  status: string;
+  result?: RecommendationReport;
+}> {
+  if (USE_MOCK) {
+    return {
+      status: 'COMPLETED',
+      result: finderRecommendationsReportMock,
+    };
+  }
+
+  const res = await fetch(`/api/search_house/${searchHouseId}`);
+
+  if (!res.ok) throw new Error('추천 상태 조회에 실패했습니다.');
+
+  const data = await res.json();
+
+  return {
+    status: data.status?.toUpperCase?.() || 'PROCESSING',
+    result: data.status === 'COMPLETED' ? (data.result ?? data) : undefined,
+  };
 }
 
 /**
