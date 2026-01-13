@@ -655,7 +655,7 @@ export default function RecommendationDetailPage() {
       )}
 
       {/* 챗봇 위젯 */}
-      {chatbotListing && <ChatbotWidget listing={chatbotListing} />}
+      {chatbotListing && <ChatbotWidget key={chatbotListing.id} listing={chatbotListing} />}
     </main>
   );
 }
