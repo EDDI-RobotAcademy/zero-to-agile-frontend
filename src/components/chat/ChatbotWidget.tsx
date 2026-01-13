@@ -14,6 +14,56 @@ function createMessage(sender: Message["sender"], text: string): Message {
   return { id: `${sender}-${Date.now()}-${Math.random()}`, sender, text };
 }
 
+function formatBotResponse(data: any): string {
+  const answer = data?.answer;
+
+  if (!answer) {
+    return "응답을 해석하지 못했습니다.";
+  }
+
+  // 1. { answer: { 답변: string } } 형식
+  if (typeof answer["답변"] === "string") {
+    return answer["답변"];
+  }
+
+  // 2. { answer: { 요약: string, 장점: [...], 단점/주의사항: [...], 추가 확인 체크리스트: [...] } } 형식
+  if (answer["요약"] || answer["장점"] || answer["단점/주의사항"] || answer["추가 확인 체크리스트"]) {
+    let formatted = "";
+
+    if (answer["요약"]) {
+      formatted += `📋 요약\n${answer["요약"]}\n\n`;
+    }
+
+    if (Array.isArray(answer["장점"]) && answer["장점"].length > 0) {
+      formatted += `✅ 장점\n`;
+      answer["장점"].forEach((item: string, idx: number) => {
+        formatted += `${idx + 1}. ${item}\n`;
+      });
+      formatted += "\n";
+    }
+
+    if (Array.isArray(answer["단점/주의사항"]) && answer["단점/주의사항"].length > 0) {
+      formatted += `⚠️ 단점/주의사항\n`;
+      answer["단점/주의사항"].forEach((item: string, idx: number) => {
+        formatted += `${idx + 1}. ${item}\n`;
+      });
+      formatted += "\n";
+    }
+
+    if (Array.isArray(answer["추가 확인 체크리스트"]) && answer["추가 확인 체크리스트"].length > 0) {
+      formatted += `📝 추가 확인 체크리스트\n`;
+      answer["추가 확인 체크리스트"].forEach((item: string, idx: number) => {
+        formatted += `${idx + 1}. ${item}\n`;
+      });
+    }
+
+    return formatted.trim() || "응답을 해석하지 못했습니다.";
+  }
+
+  // 기본값
+  return "응답을 해석하지 못했습니다.";
+}
+
 export function ChatbotWidget({ listing }: { listing: any }) {
   const { isAuthenticated, authFetch } = useRole();
   const [isOpen, setIsOpen] = useState(false);
@@ -95,10 +145,7 @@ export function ChatbotWidget({ listing }: { listing: any }) {
       }
 
     const data = await res.json();
-    const replyText =
-      typeof data?.answer === "string"
-        ? data.answer
-        : "응답을 해석하지 못했습니다.";
+    const replyText = formatBotResponse(data);
       setMessages((prev) => [...prev, createMessage("bot", replyText)]);
     } catch (err: any) {
       setMessages((prev) => [
