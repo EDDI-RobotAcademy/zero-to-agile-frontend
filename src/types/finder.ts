@@ -80,64 +80,90 @@ export type TaskStatus =
   | "ERROR";
 
 export type RawHouse = {
-  title?: string;
-  sales_type?: string;
-  deposit?: number;
-  monthly_rent?: number;
-  manage_cost?: number;
-  room_type?: string;
-  exclusive_area_m2?: number;
-  floor?: number;
-  address?: string;
-  images?: string[];
+  house_platform_id: number;
+  title: string;
+  address: string;
+  deposit: number;
+  monthly_rent: number;
+  manage_cost: number;
+  snapshot_id: string;
+  sales_type: string;
+  room_type: string;
+  residence_type: string;
+  contract_area: number;
+  exclusive_area: number;
+  floor_no: number;
+  all_floors: number;
+  lat_lng: { lat: number; lng: number };
+  image_urls: string[];
+  gu_nm: string;
+  dong_nm: string;
+  abang_user_id: number | null;
+  created_at: string;
+  updated_at: string;
+  registered_at: string | null;
+  domain_id: string | null;
+  rgst_no: string | null;
+  pnu_cd: string | null;
+  is_banned: boolean;
+  can_park: boolean;
+  has_elevator: boolean;
 };
 
 export type ObservationSummary = {
-  cohort_id?: number;
-  cohort_level?: string;
-  dist_snapshot_id?: number;
-  window?: { start?: string; end?: string };
-  price?: {
-    monthly_cost_est?: number;
-    price_percentile?: number;
-    price_z?: number;
+  snapshot_id: string;
+  observation_version: string;
+  source_data_version: string;
+  calculated_at: string;
+  price: {
+    monthly_cost_est: number;
+    price_percentile: number;
+    price_zscore: number;
+    price_burden_nonlinear: number;
+    estimated_move_in_cost: number;
   };
-  commute?: {
-    distance_to_school_min?: number;
-    distance_bucket?: string;
-    distance_percentile?: number;
+  commute: {
+    distance_to_school_min: number;
+    distance_bucket: string;
+    distance_percentile: number;
+    distance_nonlinear_score: number;
+    distance_details_top3: any[];
   };
-  risk?: {
-    risk_event_count?: number;
-    risk_probability_est?: number;
-    risk_severity_score?: number;
+  risk: {
+    risk_event_count: number;
+    risk_event_types: string[];
+    risk_probability_est: number;
+    risk_severity_score: number;
+    risk_nonlinear_penalty: number;
   };
-  options?: {
-    essential_option_coverage?: number;
+  options: {
+    essential_option_coverage: number;
+    convenience_score: number;
   };
 };
 
 export type ScoreBreakdown = {
-  weights?: {
-    affordability?: number;
-    commute?: number;
-    safety?: number;
-    options?: number;
+  weights: {
+    price: number;
+    risk: number;
+    option: number;
+    distance: number;
   };
-  affordability_score?: number;
-  commute_score?: number;
-  safety_score?: number;
-  option_score?: number;
-  total_score?: number;
+  price_score: number;
+  option_score: number;
+  risk_score: number;
+  distance_score: number;
+  total_score: number;
 };
 
 export type AIExplanation = {
-  reasons_top3?: Array<{
+  recommended_reasons?: Array<{
     code: string;
     text: string;
     evidence?: Record<string, unknown>;
   }>;
-  warnings?: string[];
+  reject_reasons?: RejectReason[];
+  warnings: string[];
 };
 
 export type RejectReason = {
@@ -151,9 +177,9 @@ export type RecommendationItem = {
   decision_status: "RECOMMENDED";
   house_platform_id: number;
   raw: RawHouse;
-  observation_summary?: ObservationSummary;
-  score_breakdown?: ScoreBreakdown;
-  ai_explanation?: AIExplanation;
+  observation_summary: ObservationSummary;
+  score_breakdown: ScoreBreakdown;
+  ai_explanation: AIExplanation;
 };
 
 export type RejectedItem = {
@@ -161,44 +187,53 @@ export type RejectedItem = {
   decision_status: "REJECTED";
   house_platform_id: number;
   raw: RawHouse;
-  observation_summary?: ObservationSummary;
-  reject_reasons?: RejectReason[];
-  explanation?: { reasons_top3?: never[]; warnings?: string[] };
+  observation_summary: ObservationSummary;
+  score_breakdown: ScoreBreakdown | null;
+  reject_reasons: RejectReason[];
+  ai_explanation: AIExplanation;
 };
 
 export type RecommendationReport = {
-  request_id: string;
+  finder_request_id: number;
   generated_at: string;
-  query_context?: {
-    segment_id?: string;
-    policy_version?: string;
-    region_scope?: string;
-    rep_school_set?: {
+  status: string;
+  detail: string | null;
+  query_context: {
+    segment_id: string;
+    policy_version: string;
+    region_scope: string | null;
+    rep_school_set: {
       rep_school_set_id?: number;
       name?: string;
       route_mode?: string;
       route_version?: string;
-    };
-    cohort_rule?: {
+    } | null;
+    cohort_rule: {
       cohort_key?: string;
       fallback_levels?: string[];
       window_days?: number;
-    };
-    user_constraints?: {
-      budget_deposit_max?: number;
-      budget_monthly_max?: number;
-      max_commute_min?: number;
-      max_old_residance?: number;
-      must_have_options?: string[];
+    } | null;
+    user_constraints: {
+      budget_deposit_max: number;
+      budget_monthly_max: number;
+      price_type: string;
+      preferred_region: string;
+      house_type: string | null;
+      additional_condition: string | null;
+      is_near: boolean;
+      aircon_yn: string;
+      washer_yn: string;
+      fridge_yn: string;
+      max_building_age: number;
     };
   };
-  summary?: {
-    total_candidates?: number;
-    recommended_count?: number;
-    rejected_count?: number;
-    top_k?: number;
-    rejection_top_k?: number;
+  summary: {
+    total_candidates: number;
+    recommended_count: number;
+    rejected_count: number;
+    top_k: number;
+    rejection_top_k: number;
   };
-  recommended_top_k?: RecommendationItem[];
-  rejected_top_k?: RejectedItem[];
+  recommended_top_k: RecommendationItem[];
+  rejected_top_k: RejectedItem[];
 };
