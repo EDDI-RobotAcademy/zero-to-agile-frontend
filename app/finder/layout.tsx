@@ -45,37 +45,56 @@ export default function FinderLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-wrap items-center justify-between gap-4 rounded-lg bg-white p-4 shadow">
-        <div>
-          <p className="text-xs uppercase text-blue-600">임차인 전용</p>
-          <h1 className="text-2xl font-bold">Finder Dashboard</h1>
-          <p className="text-sm text-gray-600">{(userName || '사용자')} 님, 안녕하세요!</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <nav className="flex flex-wrap gap-3 text-sm font-medium">
-            {/* <Link href="/finder" className="rounded px-3 py-2 hover:bg-blue-50">
-              홈
-            </Link> */}
-            <Link href="/finder/request" className="rounded px-3 py-2 hover:bg-blue-50">
-              내 의뢰서
-            </Link>
-            <Link href="/finder/wishlist" className="rounded px-3 py-2 hover:bg-blue-50">
-              위시리스트
-            </Link>
-            <Link href="/finder/contacts" className="rounded px-3 py-2 hover:bg-blue-50">
-              임대인 컨택
-            </Link>
-          </nav>
-          <button
-            onClick={handleLogout}
-            className="rounded border border-blue-200 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50"
-          >
-            로그아웃
-          </button>
+    <div className="min-h-screen bg-slate-50">
+      {/* 전체 너비 Header */}
+      <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white shadow-sm">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+          {/* 왼쪽: 로고 + 네비게이션 */}
+          <div className="flex items-center gap-8">
+            <div className="flex items-center gap-2">
+              <h1 className="text-[22px] font-bold text-blue-600">AgileBang</h1>
+              <span className="rounded bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700">임차인</span>
+            </div>
+
+            <nav className="flex items-center gap-1">
+              <Link
+                href="/finder/request"
+                className="rounded-lg px-4 py-2 text-[15px] font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-blue-600"
+              >
+                내 의뢰서
+              </Link>
+              <Link
+                href="/finder/wishlist"
+                className="rounded-lg px-4 py-2 text-[15px] font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-blue-600"
+              >
+                위시리스트
+              </Link>
+              <Link
+                href="/finder/contacts"
+                className="rounded-lg px-4 py-2 text-[15px] font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-blue-600"
+              >
+                컨택 요청
+              </Link>
+            </nav>
+          </div>
+
+          {/* 오른쪽: 사용자 정보 + 로그아웃 */}
+          <div className="flex items-center gap-4">
+            <span className="text-[15px] text-slate-600">{userName || '사용자'} 님</span>
+            <button
+              onClick={handleLogout}
+              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-[15px] font-medium text-slate-700 transition-colors hover:bg-slate-50"
+            >
+              로그아웃
+            </button>
+          </div>
         </div>
       </header>
-      {children}
+
+      {/* 콘텐츠 영역 */}
+      <main className="mx-auto max-w-7xl px-6 py-8">
+        {children}
+      </main>
     </div>
   );
 }

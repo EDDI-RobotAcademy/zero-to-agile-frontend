@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FormEvent, Suspense, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -25,7 +25,7 @@ function LoginContent() {
 
   const nextPath = useMemo(() => {
     if (roleParam === 'finder') return '/finder';
-    if (roleParam === 'owner') return '/owner';
+    if (roleParam === 'owner') return '/owner/listings';
     return '/auth/role-select';
   }, [roleParam]);
 
@@ -57,17 +57,14 @@ function LoginContent() {
   };
 
   return (
-    <main className="space-y-8">
-      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-sky-100 via-white to-blue-50 p-6 shadow-sm ring-1 ring-slate-100">
+    <main className="mx-auto w-full max-w-7xl space-y-6">
+      <div className="mt-[50px] overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 via-white to-blue-50 p-8 shadow-sm ring-1 ring-blue-100">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm font-semibold text-sky-700">로그인</p>
-            <h1 className="text-3xl font-bold text-slate-900 md:text-4xl">
+            <p className="text-[12px] font-medium tracking-tight text-blue-500 ml-0.5">로그인</p>
+            <h1 className="text-[26px] font-semibold tracking-[-0.015em] mb-1 text-slate-900">
               {roleLabel ?? '역할을 선택하고 로그인하세요'}
             </h1>
-            <p className="text-sm text-slate-600">
-              선택한 역할에 맞춰 맞춤 대시보드를 바로 시작할 수 있어요.
-            </p>
           </div>
           <Link
             className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5"
@@ -81,7 +78,7 @@ function LoginContent() {
       <div className="grid gap-6 lg:grid-cols-[1.1fr,0.9fr]">
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 rounded-2xl border border-slate-100 bg-white/95 p-6 shadow-[0_10px_40px_rgba(15,23,42,0.06)]"
+          className="space-y-4 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200"
         >
           <div className="space-y-2">
             <label className="text-sm font-semibold text-slate-800" htmlFor="email">
@@ -89,7 +86,7 @@ function LoginContent() {
             </label>
             <input
               id="email"
-              className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm shadow-inner shadow-slate-50 transition focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-100"
+              className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -103,38 +100,38 @@ function LoginContent() {
             </label>
             <input
               id="password"
-              className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm shadow-inner shadow-slate-50 transition focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-100"
+              className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-sm transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               type="password"
-              placeholder="••••••••"
+              placeholder="********"
             />
           </div>
-          <Button type="submit" className="w-full rounded-xl py-3 text-base">
+          <Button type="submit" className="w-full rounded-lg py-2.5 text-base">
             로그인
           </Button>
         </form>
 
-        <div className="space-y-3 rounded-2xl border border-slate-100 bg-white/95 p-6 shadow-[0_10px_40px_rgba(15,23,42,0.06)]">
+        <div className="space-y-3 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
           <p className="text-sm font-semibold text-slate-800">소셜 로그인</p>
           <div className="grid gap-3 md:grid-cols-3">
             <button
               type="button"
-              className="flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-800 shadow-inner shadow-slate-50 transition hover:-translate-y-0.5 hover:border-sky-300 hover:shadow-lg"
+              className="flex items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-lg"
               onClick={handleGoogleLogin}
             >
               Google로 계속하기
             </button>
             <button
               type="button"
-              className="flex items-center justify-center rounded-xl border border-yellow-200 bg-yellow-50 px-3 py-3 text-sm font-semibold text-yellow-800 shadow-inner shadow-yellow-50 transition hover:-translate-y-0.5 hover:border-yellow-300 hover:shadow-lg"
+              className="flex items-center justify-center rounded-lg border border-yellow-200 bg-yellow-50 px-3 py-2.5 text-sm font-semibold text-yellow-800 transition hover:-translate-y-0.5 hover:border-yellow-300 hover:shadow-lg"
             >
               Kakao로 계속하기
             </button>
             <button
               type="button"
-              className="flex items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-3 text-sm font-semibold text-emerald-800 shadow-inner shadow-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-lg"
+              className="flex items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm font-semibold text-emerald-800 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-lg"
             >
               Naver로 계속하기
             </button>
@@ -147,3 +144,5 @@ function LoginContent() {
     </main>
   );
 }
+
+

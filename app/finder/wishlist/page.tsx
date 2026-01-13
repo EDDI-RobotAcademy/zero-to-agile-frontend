@@ -5,13 +5,15 @@ import { useRouter } from 'next/navigation';
 import { listWishlist, removeFromWishlist } from '@/lib/repositories/wishlistRepository';
 import { WishlistItem } from '@/types/wishlist';
 import { Button } from '@/components/common/Button';
+import { ResidenceType } from '@/types/owner';
 
-const ROOM_TYPE_LABEL: Record<string, string> = {
-  '아파트': '아파트',
+const RESIDENCE_TYPE_LABEL: Record<ResidenceType, string> = {
+  '원룸': '원룸',
+  '투룸': '투룸',
+  '쓰리룸': '쓰리룸',
   '오피스텔': '오피스텔',
+  '아파트': '아파트',
   '빌라': '빌라',
-  '단독주택': '단독주택',
-  '상가': '상가',
 };
 
 export default function WishlistPage() {
@@ -66,13 +68,19 @@ export default function WishlistPage() {
   return (
     <main className="space-y-6">
       {/* 헤더 */}
-      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-pink-100 via-white to-purple-50 p-8 shadow-sm ring-1 ring-slate-100">
-        <div className="space-y-1">
-          <p className="text-sm font-semibold text-pink-700">내가 찜한</p>
-          <h2 className="text-3xl font-bold text-slate-900">위시리스트</h2>
-          <p className="text-sm text-slate-600">
-            관심있는 매물을 모아서 비교하고 관리하세요
-          </p>
+      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-blue-100 via-white to-blue-50 p-8 shadow-sm ring-1 ring-blue-100">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-[12px] font-medium tracking-tight text-blue-500 ml-0.5">
+              내가 찜한
+            </p>
+            <h2 className="text-[26px] font-semibold tracking-[-0.015em] mb-1 text-slate-900">
+              위시리스트
+            </h2>
+            <p className="text-sm tracking-[-0.005em] leading-relaxed text-slate-500">
+              관심있는 매물을 모아서 비교하고 관리하세요
+            </p>
+          </div>
         </div>
       </div>
 
@@ -131,7 +139,7 @@ export default function WishlistPage() {
                     {item.salesType}
                   </span>
                   <span className="rounded-lg bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
-                    {ROOM_TYPE_LABEL[item.roomType] || item.roomType}
+                    {RESIDENCE_TYPE_LABEL[item.roomType as ResidenceType] || item.roomType}
                   </span>
                 </div>
 

@@ -11,7 +11,7 @@ export default function Home() {
   useEffect(() => {
     if (!isReady) return;
     if (role === 'finder') router.replace('/finder');
-    else if (role === 'owner') router.replace('/owner');
+    else if (role === 'owner') router.replace('/owner/listings');
     else router.replace('/auth/role-select');
   }, [role, isReady, router]);
 
