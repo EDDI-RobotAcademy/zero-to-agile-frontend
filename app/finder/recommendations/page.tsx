@@ -29,7 +29,20 @@ function formatNumber(value?: number) {
 
 function formatScore(value?: number) {
   if (value === undefined || value === null) return "-";
-  return `${Math.round(value * 100)}%`;
+  return `${Math.round(value)}점`;
+}
+
+function formatDate(dateString?: string) {
+  if (!dateString) return "-";
+  try {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  } catch {
+    return dateString;
+  }
 }
 
 export default function FinderRecommendationsPage() {
@@ -56,7 +69,7 @@ export default function FinderRecommendationsPage() {
 
     return (
       <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-        <div className="grid gap-4 md:grid-cols-5">
+        <div className="grid gap-4 md:grid-cols-3">
           <div className="rounded-2xl bg-slate-50 p-4">
             <p className="text-xs text-slate-500">총 후보</p>
             <p className="text-lg font-bold text-slate-900">
@@ -75,34 +88,16 @@ export default function FinderRecommendationsPage() {
               {formatNumber(summary?.rejected_count)}
             </p>
           </div>
-          <div className="rounded-2xl bg-slate-50 p-4">
-            <p className="text-xs text-slate-500">Top K</p>
-            <p className="text-lg font-bold text-slate-900">
-              {formatNumber(summary?.top_k)}
-            </p>
-          </div>
-          <div className="rounded-2xl bg-slate-50 p-4">
-            <p className="text-xs text-slate-500">정책 버전</p>
-            <p className="text-lg font-bold text-slate-900">
-              {query?.policy_version ?? "-"}
-            </p>
-          </div>
         </div>
 
-        <div className="mt-4 grid gap-3 text-xs text-slate-500 md:grid-cols-3">
+        <div className="mt-4 grid gap-3 text-xs text-slate-500 md:grid-cols-2">
           <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
-            <p className="font-semibold text-slate-600">세그먼트</p>
-            <p>{query?.segment_id ?? "-"}</p>
+            <p className="font-semibold text-slate-600">선호 지역</p>
+            <p>{query?.user_constraints?.preferred_region ?? "-"}</p>
           </div>
           <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
-            <p className="font-semibold text-slate-600">지역 스코프</p>
-            <p>{query?.region_scope ?? "-"}</p>
-          </div>
-          <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
-            <p className="font-semibold text-slate-600">필수 옵션</p>
-            <p>
-              {(query?.user_constraints?.must_have_options ?? []).join(", ") || "-"}
-            </p>
+            <p className="font-semibold text-slate-600">최대 건물 연식</p>
+            <p>{query?.user_constraints?.max_building_age ?? "-"}년</p>
           </div>
         </div>
       </div>
@@ -116,7 +111,7 @@ export default function FinderRecommendationsPage() {
     const recommendationData = {
       observation: item.observation_summary,
       score: "score_breakdown" in item ? item.score_breakdown : undefined,
-      reasons: "ai_explanation" in item ? item.ai_explanation?.reasons_top3 : [],
+      reasons: "ai_explanation" in item ? item.ai_explanation?.recommended_reasons : [],
       rejects: "reject_reasons" in item ? item.reject_reasons : [],
       rank: item.rank,
       decision_status: item.decision_status,
@@ -141,7 +136,7 @@ export default function FinderRecommendationsPage() {
     const raw = item.raw || {};
     const observation = item.observation_summary;
     const score = "score_breakdown" in item ? item.score_breakdown : undefined;
-    const reasons = "ai_explanation" in item ? item.ai_explanation?.reasons_top3 : [];
+    const reasons = "ai_explanation" in item ? item.ai_explanation?.recommended_reasons : [];
     const rejects = "reject_reasons" in item ? item.reject_reasons : [];
 
     return (
@@ -187,7 +182,7 @@ export default function FinderRecommendationsPage() {
             <div className="rounded-2xl bg-slate-50 p-4">
               <p className="text-xs text-slate-500">면적 / 층수</p>
               <p className="text-lg font-bold text-slate-900">
-                {raw.exclusive_area_m2 ?? "-"}㎡ · {raw.floor ?? "-"}층
+                {raw.exclusive_area ?? "-"}㎡ · {raw.floor_no ?? "-"}층
               </p>
             </div>
             <div className="rounded-2xl bg-slate-50 p-4">
@@ -200,14 +195,26 @@ export default function FinderRecommendationsPage() {
 
           {activeTab === "recommended" && (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-              <p className="text-xs font-bold text-emerald-700">추천 이유</p>
-              <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-emerald-900">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="rounded-full bg-emerald-600 p-1">
+                  <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </span>
+                <p className="text-xs font-bold text-emerald-700">AI 추천 이유</p>
+              </div>
+              <ul className="space-y-2">
                 {(reasons ?? []).length > 0 ? (
-                  reasons?.map((reason) => (
-                    <li key={reason.code}>{reason.text}</li>
+                  reasons?.map((reason, idx) => (
+                    <li key={reason.code} className="flex items-start gap-2">
+                      <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-emerald-600 text-[10px] font-bold text-white">
+                        {idx + 1}
+                      </span>
+                      <p className="flex-1 text-sm leading-relaxed text-emerald-900">{reason.text}</p>
+                    </li>
                   ))
                 ) : (
-                  <li>추천 이유를 불러오지 못했습니다.</li>
+                  <li className="text-sm text-emerald-700">추천 이유를 불러오지 못했습니다.</li>
                 )}
               </ul>
             </div>
@@ -215,14 +222,26 @@ export default function FinderRecommendationsPage() {
 
           {activeTab === "rejected" && (
             <div className="rounded-2xl border border-red-200 bg-red-50 p-4">
-              <p className="text-xs font-bold text-red-700">제외 이유</p>
-              <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-red-900">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="rounded-full bg-red-600 p-1">
+                  <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </span>
+                <p className="text-xs font-bold text-red-700">제외 이유</p>
+              </div>
+              <ul className="space-y-2">
                 {(rejects ?? []).length > 0 ? (
-                  rejects?.map((reason) => (
-                    <li key={reason.code}>{reason.text}</li>
+                  rejects?.map((reason, idx) => (
+                    <li key={reason.code} className="flex items-start gap-2">
+                      <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white">
+                        {idx + 1}
+                      </span>
+                      <p className="flex-1 text-sm leading-relaxed text-red-900">{reason.text}</p>
+                    </li>
                   ))
                 ) : (
-                  <li>제외 이유를 불러오지 못했습니다.</li>
+                  <li className="text-sm text-red-700">제외 이유를 불러오지 못했습니다.</li>
                 )}
               </ul>
             </div>
@@ -248,38 +267,70 @@ export default function FinderRecommendationsPage() {
           {expanded && (
             <div className="grid gap-4 md:grid-cols-2">
               <div className="rounded-2xl bg-slate-50 p-4">
-                <p className="text-xs font-bold text-slate-700">관측 요약</p>
-                <div className="mt-2 space-y-1 text-sm text-slate-700">
-                  <p>
-                    통학 시간:{" "}
-                    {formatNumber(observation?.commute?.distance_to_school_min)} 분
-                  </p>
-                  <p>
-                    월비용 추정:{" "}
-                    {formatNumber(observation?.price?.monthly_cost_est)}만원
-                  </p>
-                  <p>
-                    가격 분위: {observation?.price?.price_percentile ?? "-"}
-                  </p>
-                  <p>
-                    리스크 확률:{" "}
-                    {observation?.risk?.risk_probability_est ?? "-"}
-                  </p>
-                  <p>
-                    옵션 커버리지:{" "}
-                    {observation?.options?.essential_option_coverage ?? "-"}
-                  </p>
+                <p className="text-xs font-bold text-slate-700 mb-2">관측 요약</p>
+                <div className="space-y-2 text-xs text-slate-600">
+                  <div className="flex justify-between">
+                    <span>통학 시간</span>
+                    <span className="font-semibold text-slate-900">
+                      {formatNumber(observation?.commute?.distance_to_school_min)} 분
+                      {observation?.commute?.distance_bucket && (
+                        <span className="ml-1 text-blue-600">({observation.commute.distance_bucket})</span>
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>월비용 추정</span>
+                    <span className="font-semibold text-slate-900">
+                      {formatNumber(observation?.price?.monthly_cost_est)}만원
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>가격 분위</span>
+                    <span className="font-semibold text-slate-900">
+                      {observation?.price?.price_percentile !== undefined
+                        ? `${Math.round(observation.price.price_percentile * 100)}%`
+                        : "-"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>리스크 확률</span>
+                    <span className="font-semibold text-slate-900">
+                      {observation?.risk?.risk_probability_est !== undefined
+                        ? `${(observation.risk.risk_probability_est * 100).toFixed(1)}%`
+                        : "-"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>옵션 커버리지</span>
+                    <span className="font-semibold text-slate-900">
+                      {observation?.options?.essential_option_coverage !== undefined
+                        ? `${Math.round(observation.options.essential_option_coverage * 100)}%`
+                        : "-"}
+                    </span>
+                  </div>
                 </div>
               </div>
 
               {activeTab === "recommended" && (
                 <div className="rounded-2xl bg-slate-50 p-4">
-                  <p className="text-xs font-bold text-slate-700">점수 요약</p>
-                  <div className="mt-2 space-y-1 text-sm text-slate-700">
-                    <p>가격 점수: {formatScore(score?.affordability_score)}</p>
-                    <p>통학 점수: {formatScore(score?.commute_score)}</p>
-                    <p>안전 점수: {formatScore(score?.safety_score)}</p>
-                    <p>옵션 점수: {formatScore(score?.option_score)}</p>
+                  <p className="text-xs font-bold text-slate-700 mb-2">점수 요약</p>
+                  <div className="space-y-2 text-xs text-slate-600">
+                    <div className="flex justify-between">
+                      <span>가격 점수</span>
+                      <span className="font-semibold text-slate-900">{score?.price_score ?? "-"}점</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>거리 점수</span>
+                      <span className="font-semibold text-slate-900">{score?.distance_score ?? "-"}점</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>리스크 점수</span>
+                      <span className="font-semibold text-slate-900">{score?.risk_score ?? "-"}점</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>옵션 점수</span>
+                      <span className="font-semibold text-slate-900">{score?.option_score ?? "-"}점</span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -429,10 +480,9 @@ export default function FinderRecommendationsPage() {
               추천 / 제외 이유와 근거를 함께 확인하세요.
             </p>
           </div>
-          {report?.request_id && (
+          {report?.generated_at && (
             <div className="rounded-2xl bg-white px-4 py-3 text-xs text-slate-500 shadow-sm ring-1 ring-slate-200">
-              <div>요청 ID: {report.request_id}</div>
-              <div>생성: {report.generated_at}</div>
+              <div>생성일: {formatDate(report.generated_at)}</div>
             </div>
           )}
         </div>
