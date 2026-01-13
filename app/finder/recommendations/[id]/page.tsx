@@ -28,30 +28,47 @@ import {
 
 type RecommendationData = {
   observation?: {
+    snapshot_id?: string;
+    observation_version?: string;
+    source_data_version?: string;
+    calculated_at?: string;
     commute?: {
       distance_to_school_min?: number;
       distance_bucket?: string;
       distance_percentile?: number;
+      distance_nonlinear_score?: number;
+      distance_details_top3?: any[];
     };
     price?: {
       monthly_cost_est?: number;
       price_percentile?: number;
-      price_z?: number;
+      price_zscore?: number;
+      price_burden_nonlinear?: number;
+      estimated_move_in_cost?: number;
     };
     risk?: {
       risk_event_count?: number;
+      risk_event_types?: string[];
       risk_probability_est?: number;
       risk_severity_score?: number;
+      risk_nonlinear_penalty?: number;
     };
     options?: {
       essential_option_coverage?: number;
+      convenience_score?: number;
     };
   };
   score?: {
-    affordability_score?: number;
-    commute_score?: number;
-    safety_score?: number;
+    weights?: {
+      price?: number;
+      risk?: number;
+      option?: number;
+      distance?: number;
+    };
+    price_score?: number;
     option_score?: number;
+    risk_score?: number;
+    distance_score?: number;
     total_score?: number;
   };
   reasons?: Array<{
@@ -76,7 +93,7 @@ function formatNumber(value?: number) {
 
 function formatScore(value?: number) {
   if (value === undefined || value === null) return "-";
-  return `${Math.round(value * 100)}%`;
+  return `${Math.round(value)}점`;
 }
 
 async function handleContactSubmit(
@@ -316,29 +333,35 @@ export default function RecommendationDetailPage() {
             </div>
           </div>
           <div className="p-6">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-2xl bg-slate-50 p-4">
-                <p className="text-xs text-slate-500">총점</p>
-                <p className="text-2xl font-bold text-blue-600">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 p-4">
+                <p className="text-xs font-medium text-blue-600">총점</p>
+                <p className="text-2xl font-bold text-blue-700">
                   {formatScore(recommendationData.score.total_score)}
                 </p>
               </div>
               <div className="rounded-2xl bg-slate-50 p-4">
                 <p className="text-xs text-slate-500">가격 점수</p>
                 <p className="text-lg font-semibold text-slate-900">
-                  {formatScore(recommendationData.score.affordability_score)}
+                  {formatScore(recommendationData.score.price_score)}
                 </p>
               </div>
               <div className="rounded-2xl bg-slate-50 p-4">
-                <p className="text-xs text-slate-500">통학 점수</p>
+                <p className="text-xs text-slate-500">거리 점수</p>
                 <p className="text-lg font-semibold text-slate-900">
-                  {formatScore(recommendationData.score.commute_score)}
+                  {formatScore(recommendationData.score.distance_score)}
                 </p>
               </div>
               <div className="rounded-2xl bg-slate-50 p-4">
-                <p className="text-xs text-slate-500">안전 점수</p>
+                <p className="text-xs text-slate-500">리스크 점수</p>
                 <p className="text-lg font-semibold text-slate-900">
-                  {formatScore(recommendationData.score.safety_score)}
+                  {formatScore(recommendationData.score.risk_score)}
+                </p>
+              </div>
+              <div className="rounded-2xl bg-slate-50 p-4">
+                <p className="text-xs text-slate-500">옵션 점수</p>
+                <p className="text-lg font-semibold text-slate-900">
+                  {formatScore(recommendationData.score.option_score)}
                 </p>
               </div>
             </div>
@@ -358,42 +381,70 @@ export default function RecommendationDetailPage() {
           <div className="p-6">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {recommendationData.observation.commute?.distance_to_school_min !== undefined && (
-                <div className="rounded-2xl bg-slate-50 p-4">
-                  <p className="text-xs text-slate-500">통학 시간</p>
-                  <p className="text-lg font-semibold text-slate-900">
+                <div className="rounded-2xl bg-blue-50 p-4">
+                  <p className="text-xs font-medium text-blue-600">통학 시간</p>
+                  <p className="text-lg font-bold text-blue-900">
                     {formatNumber(recommendationData.observation.commute.distance_to_school_min)} 분
                   </p>
+                  {recommendationData.observation.commute.distance_bucket && (
+                    <p className="mt-1 text-xs text-blue-600">
+                      {recommendationData.observation.commute.distance_bucket}
+                    </p>
+                  )}
                 </div>
               )}
               {recommendationData.observation.price?.monthly_cost_est !== undefined && (
-                <div className="rounded-2xl bg-slate-50 p-4">
-                  <p className="text-xs text-slate-500">월비용 추정</p>
-                  <p className="text-lg font-semibold text-slate-900">
+                <div className="rounded-2xl bg-emerald-50 p-4">
+                  <p className="text-xs font-medium text-emerald-600">월비용 추정</p>
+                  <p className="text-lg font-bold text-emerald-900">
                     {formatNumber(recommendationData.observation.price.monthly_cost_est)}만원
                   </p>
+                  {recommendationData.observation.price.price_percentile !== undefined && (
+                    <p className="mt-1 text-xs text-emerald-600">
+                      가격 분위: {Math.round(recommendationData.observation.price.price_percentile * 100)}%
+                    </p>
+                  )}
                 </div>
               )}
-              {recommendationData.observation.price?.price_percentile !== undefined && (
+              {recommendationData.observation.price?.estimated_move_in_cost !== undefined && (
                 <div className="rounded-2xl bg-slate-50 p-4">
-                  <p className="text-xs text-slate-500">가격 분위</p>
+                  <p className="text-xs text-slate-500">입주 예상 비용</p>
                   <p className="text-lg font-semibold text-slate-900">
-                    {recommendationData.observation.price.price_percentile.toFixed(2)}
+                    {formatNumber(recommendationData.observation.price.estimated_move_in_cost)}만원
                   </p>
                 </div>
               )}
-              {recommendationData.observation.risk?.risk_probability_est !== undefined && (
-                <div className="rounded-2xl bg-slate-50 p-4">
-                  <p className="text-xs text-slate-500">리스크 확률</p>
-                  <p className="text-lg font-semibold text-slate-900">
-                    {recommendationData.observation.risk.risk_probability_est.toFixed(2)}
+              {recommendationData.observation.risk?.risk_event_count !== undefined && (
+                <div className="rounded-2xl bg-amber-50 p-4">
+                  <p className="text-xs font-medium text-amber-600">리스크 이벤트</p>
+                  <p className="text-lg font-bold text-amber-900">
+                    {recommendationData.observation.risk.risk_event_count}건
                   </p>
+                  {recommendationData.observation.risk.risk_probability_est !== undefined && (
+                    <p className="mt-1 text-xs text-amber-600">
+                      확률: {(recommendationData.observation.risk.risk_probability_est * 100).toFixed(1)}%
+                    </p>
+                  )}
                 </div>
               )}
               {recommendationData.observation.options?.essential_option_coverage !== undefined && (
+                <div className="rounded-2xl bg-purple-50 p-4">
+                  <p className="text-xs font-medium text-purple-600">필수 옵션 커버리지</p>
+                  <p className="text-lg font-bold text-purple-900">
+                    {Math.round(recommendationData.observation.options.essential_option_coverage * 100)}%
+                  </p>
+                  {recommendationData.observation.options.convenience_score !== undefined && (
+                    <p className="mt-1 text-xs text-purple-600">
+                      편의성: {Math.round(recommendationData.observation.options.convenience_score * 100)}%
+                    </p>
+                  )}
+                </div>
+              )}
+              {recommendationData.observation.price?.price_zscore !== undefined && (
                 <div className="rounded-2xl bg-slate-50 p-4">
-                  <p className="text-xs text-slate-500">옵션 커버리지</p>
+                  <p className="text-xs text-slate-500">가격 Z-Score</p>
                   <p className="text-lg font-semibold text-slate-900">
-                    {recommendationData.observation.options.essential_option_coverage}
+                    {recommendationData.observation.price.price_zscore.toFixed(2)}
                   </p>
                 </div>
               )}
