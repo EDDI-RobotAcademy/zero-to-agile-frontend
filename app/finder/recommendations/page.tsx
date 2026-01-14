@@ -22,12 +22,12 @@ import type {
   RejectedItem,
 } from "@/types/finder";
 
-function formatNumber(value?: number) {
+function formatNumber(value?: number | null) {
   if (value === undefined || value === null) return "-";
   return Number(value).toLocaleString();
 }
 
-function formatScore(value?: number) {
+function formatScore(value?: number | null) {
   if (value === undefined || value === null) return "-";
   return `${Math.round(value)}점`;
 }
