@@ -264,33 +264,20 @@ export async function getRecommendationStatus(
 
   const data = await res.json();
 
-  // 디버깅: 전체 응답 확인
-  console.log('=== getRecommendationStatus 디버깅 ===');
-  console.log('전체 data:', JSON.stringify(data, null, 2));
-  console.log('data.status:', data.status);
-  console.log('data.result:', data.result);
-  console.log('data.result_json 존재:', !!data.result_json);
-  console.log('data.result_json 타입:', typeof data.result_json);
-
   // result_json이 있으면 우선 사용 (실제 추천 리포트가 여기 있을 가능성 높음)
   let reportData = undefined;
   if (data.status === 'COMPLETED') {
     if (data.result_json) {
-      console.log('result_json 발견! 파싱 시도');
       try {
         reportData = typeof data.result_json === 'string'
           ? JSON.parse(data.result_json)
           : data.result_json;
-        console.log('result_json 파싱 성공:', reportData);
       } catch (e) {
-        console.error('result_json 파싱 실패:', e);
         reportData = data.result ?? data;
       }
     } else if (data.result) {
-      console.log('result_json 없음, result 사용');
       reportData = data.result;
     } else {
-      console.log('result_json, result 둘 다 없음, data 자체 사용');
       reportData = data;
     }
   }
