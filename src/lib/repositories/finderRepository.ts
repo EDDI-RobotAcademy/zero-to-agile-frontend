@@ -263,10 +263,11 @@ export async function getRecommendationStatus(
   if (!res.ok) throw new Error('추천 상태 조회에 실패했습니다.');
 
   const data = await res.json();
+  const normalizedStatus = data.status?.toUpperCase?.() || 'PROCESSING';
 
   // result 우선 사용 (최신 API), fallback으로 result_json 처리
   let reportData = undefined;
-  if (data.status === 'COMPLETED') {
+  if (normalizedStatus === 'COMPLETED') {
     if (data.result !== undefined && data.result !== null) {
       try {
         reportData = typeof data.result === 'string'
@@ -291,7 +292,7 @@ export async function getRecommendationStatus(
   }
 
   return {
-    status: data.status?.toUpperCase?.() || 'PROCESSING',
+    status: normalizedStatus,
     result: reportData,
   };
 }
