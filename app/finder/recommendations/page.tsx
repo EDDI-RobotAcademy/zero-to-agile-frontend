@@ -360,21 +360,28 @@ export default function FinderRecommendationsPage() {
         const startTime = Date.now();
 
         // 폴링으로 상태 확인
-        while (isMountedRef.current) {
+        while (true) {
           const { status, result } = await getRecommendationStatus(search_house_id);
+
+          // unmount 체크 (상태 업데이트 전)
+          if (!isMountedRef.current) break;
 
           setTaskStatus(status as TaskStatus);
 
           if (status === "COMPLETED" && result) {
-            setReport(result);
-            setLoading(false);
+            if (isMountedRef.current) {
+              setReport(result);
+              setLoading(false);
+            }
             break;
           }
 
           if (Date.now() - startTime > 30000) {
-            setTaskStatus("TIMEOUT");
-            setError("추천 요청 시간이 초과되었습니다. 다시 시도해주세요.");
-            setLoading(false);
+            if (isMountedRef.current) {
+              setTaskStatus("TIMEOUT");
+              setError("추천 요청 시간이 초과되었습니다. 다시 시도해주세요.");
+              setLoading(false);
+            }
             break;
           }
 
