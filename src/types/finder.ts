@@ -83,19 +83,19 @@ export type RawHouse = {
   house_platform_id: number;
   title: string;
   address: string;
-  deposit: number;
+  deposit: number | null;
   monthly_rent: number;
-  manage_cost: number;
+  manage_cost: number | null;
   snapshot_id: string;
   sales_type: string;
   room_type: string;
   residence_type: string;
-  contract_area: number;
+  contract_area: number | null;
   exclusive_area: number;
-  floor_no: number;
+  floor_no: number | null;
   all_floors: number;
   lat_lng: { lat: number; lng: number };
-  image_urls: string[];
+  image_urls: string; // JSON string, not array
   gu_nm: string;
   dong_nm: string;
   abang_user_id: number | null;
@@ -111,7 +111,7 @@ export type RawHouse = {
 };
 
 export type ObservationSummary = {
-  snapshot_id: string;
+  snapshot_id: string | null;
   observation_version: string;
   source_data_version: string;
   calculated_at: string;
