@@ -264,10 +264,18 @@ export async function getRecommendationStatus(
 
   const data = await res.json();
 
-  // result_json이 있으면 우선 사용 (실제 추천 리포트가 여기 있을 가능성 높음)
+  // result 우선 사용 (최신 API), fallback으로 result_json 처리
   let reportData = undefined;
   if (data.status === 'COMPLETED') {
-    if (data.result_json) {
+    if (data.result !== undefined && data.result !== null) {
+      try {
+        reportData = typeof data.result === 'string'
+          ? JSON.parse(data.result)
+          : data.result;
+      } catch (e) {
+        reportData = data.result ?? data;
+      }
+    } else if (data.result_json) {
       try {
         reportData = typeof data.result_json === 'string'
           ? JSON.parse(data.result_json)
